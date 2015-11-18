@@ -1,7 +1,7 @@
-package troop;
+package services.troop;
 
-import io.NetConfig;
-import io.NetService;
+import services.io.NetConfig;
+import services.io.NetService;
 import message.Message;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class CommandService implements NetService {
 
     }
 
-    public Message nonBlockForMessage(DatagramSocket serverSocket) throws IOException {
+    public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
         return null;
     }
 }

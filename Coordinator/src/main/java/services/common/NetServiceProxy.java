@@ -1,7 +1,7 @@
-package common;
+package services.common;
 
-import io.NetConfig;
-import io.NetService;
+import services.io.NetConfig;
+import services.io.NetService;
 import message.Message;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.net.DatagramSocket;
 /**
  * Created by xingchij on 11/17/15.
  */
-public class NetServiceProxy implements io.NetService{
+public class NetServiceProxy implements services.io.NetService{
     NetService netService = null;
 
     public NetServiceProxy(NetService netService){
@@ -21,7 +21,7 @@ public class NetServiceProxy implements io.NetService{
         this.netService.sendMessage(msg, serverSocket, netConf);
     }
 
-    public Message nonBlockForMessage(DatagramSocket serverSocket) throws IOException {
-        return this.netService.nonBlockForMessage(serverSocket);
+    public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
+        return this.netService.receiveMessage(serverSocket);
     }
 }

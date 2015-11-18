@@ -1,7 +1,7 @@
-package common;
+package services.common;
 
-import io.NetService;
-import io.UDPService;
+import services.io.NetService;
+import services.io.UDPService;
 
 /**
  * Created by xingchij on 11/17/15.
@@ -14,15 +14,15 @@ public class NetServiceFactory {
     }
 
     public static NetServiceProxy getHeartBeatService(){
-        return new NetServiceProxy(new heartbeat.HeartBeatService());
+        return new NetServiceProxy(new services.heartbeat.HeartBeatService());
     }
 
     public static NetServiceProxy getCheckPointService(){
-        return new NetServiceProxy(new checkpoint.CheckPointService());
+        return new NetServiceProxy(new services.checkpoint.CheckPointService());
     }
 
     public static NetService getCommandService(){
-        return new NetServiceProxy(new troop.CommandService());
+        return new NetServiceProxy(new services.troop.CommandService());
     }
 
 }

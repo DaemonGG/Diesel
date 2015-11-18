@@ -1,10 +1,12 @@
-package io;
+package services.io;
 
 import message.Message;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketTimeoutException;
+import java.nio.channels.IllegalBlockingModeException;
 
 /**
  * Created by xingchij on 11/17/15.
@@ -31,18 +33,26 @@ public class UDPService implements NetService{
      * @return Message object
      * @throws IOException
      */
-    public Message nonBlockForMessage(DatagramSocket serverSocket) throws IOException {
+    public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
         byte[] recvData = new byte[2048];
         DatagramPacket receivePacket = new DatagramPacket(recvData, recvData.length);
 
-        serverSocket.receive(receivePacket);
-        ByteArrayInputStream objInputBytes = new ByteArrayInputStream(recvData);
-        ObjectInputStream  objInputStream= new ObjectInputStream(objInputBytes);
-        Message recvMsg = null;
         try {
-            recvMsg = (Message) objInputStream.readObject();
-        } catch (ClassNotFoundException e) {
+            serverSocket.receive(receivePacket);
+            ByteArrayInputStream objInputBytes = new ByteArrayInputStream(recvData);
+            ObjectInputStream objInputStream = new ObjectInputStream(objInputBytes);
+            Message recvMsg = null;
+            try {
+                recvMsg = (Message) objInputStream.readObject();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }catch(SocketTimeoutException e){       // timeout, only if you set the timeout in socket
             e.printStackTrace();
+            return null;
+        }catch (IllegalBlockingModeException e){   // connection reset
+            e.printStackTrace();
+            return null;
         }
     }
 }
