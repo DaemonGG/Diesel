@@ -15,11 +15,19 @@ public class HeartBeatService implements NetService {
 
     private NetService imp = new UDPService();
 
-    public void sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
+    public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
         imp.sendMessage(msg, serverSocket, netConf);
     }
 
     public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
+        return null;
+    }
+
+    /**
+     *  will not be used
+     *  heart beat need no ack
+     */
+    public Message recvAckMessage(DatagramSocket serverSocket) throws IOException {
         return null;
     }
 }

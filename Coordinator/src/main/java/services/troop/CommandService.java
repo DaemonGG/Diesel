@@ -3,6 +3,7 @@ package services.troop;
 import services.io.NetConfig;
 import services.io.NetService;
 import message.Message;
+import services.io.UDPService;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -11,11 +12,26 @@ import java.net.DatagramSocket;
  * Created by xingchij on 11/17/15.
  */
 public class CommandService implements NetService {
-    public void sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
+    private NetService imp = new UDPService();
+    public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
+        imp.sendMessage(msg, serverSocket, netConf);
 
+        serverSocket.setSoTimeout(5000);
+
+        Message ack = imp.receiveMessage(serverSocket);
+
+        if(ack == null){
+            System.out.println("wait for ack after send command. timeout");
+            return false;
+        }
+        return true;
     }
 
     public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
         return null;
+    }
+
+    public Message recvAckMessage(DatagramSocket serverSocket) throws IOException {
+        return imp.recvAckMessage(serverSocket);
     }
 }

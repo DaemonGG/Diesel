@@ -17,7 +17,7 @@ public class NetServiceProxy implements services.io.NetService{
         this.netService = netService;
     }
 
-    public void sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
+    public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
         this.netService.sendMessage(msg, serverSocket, netConf);
     }
 
