@@ -26,11 +26,13 @@ public class UDPService implements NetService{
         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
                 netConf.getInetAddress(), netConf.getPort());
         serverSocket.send(sendPacket);
+
+        return true;
     }
 
     /**
-     * It will receive messages, it will not block for message.
-     * If you prefer a blocked mode, DatagramSocket.setSoTimeout() before pass in
+     * It will receive messages, it will block for message.
+     * If you prefer a nonblocked mode, DatagramSocket.setSoTimeout() before pass in
      * @param serverSocket
      * @return Message object
      * @throws IOException

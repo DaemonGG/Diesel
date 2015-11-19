@@ -12,7 +12,7 @@ import java.net.DatagramSocket;
  */
 public class CheckPointService implements NetService {
     public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
-
+        return true;
     }
 
     public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
