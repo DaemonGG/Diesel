@@ -1,11 +1,12 @@
-package commander;
+package shared;
 
+import commander.Job;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
-import java.net.SocketException;
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,15 +18,18 @@ import java.util.List;
 public class AllSlaves {
     class Slave {
         String ip;
+        int port;
         NetConfig delegateTaskConn;
 
 
         List<Job> jobList = new ArrayList<Job>();
+        HashMap<String, Job> jobMap = new HashMap<String, Job>();
         int jobsNum = 0;
 
         public Slave(String ip, int port) throws UnknownHostException {
             delegateTaskConn = new NetConfig(ip, port);
             this.ip = ip;
+            this.port = port;
         }
 
         public String getSlaveIP(){
@@ -47,6 +51,7 @@ public class AllSlaves {
                 boolean success = commander.sendMessage(job.generateMessage(), server, delegateTaskConn);
                 if(success){
                     jobList.add(job);
+                    jobMap.put(job.getJobId(), job);
                     jobsNum++;
                 }
             }catch (IOException e){
@@ -57,10 +62,21 @@ public class AllSlaves {
             }
 
         }
+        void checkPointAddNewJob(){
+
+        }
+        void setJobStatus(String jobId, String status){
+            Job job = jobMap.get(jobId);
+            if(job == null){
+                System.out.printf("Try to set a non-exist job[%s] status\n", jobId);
+                return;
+            }
+            job.setStatus(status);
+        }
 
     }
     HashMap<String, Slave> slaves = new HashMap<String, Slave>();
-    ArrayList<String> slavesIPList = new ArrayList<String>();
+    ArrayList<String> slavesAddrList = new ArrayList<String>();
     int index = 0;
 
     private AllSlaves(){};
@@ -76,19 +92,32 @@ public class AllSlaves {
 
     public void addSlave(String ip, int port) throws UnknownHostException {
         Slave newSlave = new Slave(ip, port);
-        slaves.put(ip, newSlave);
-        slavesIPList.add(ip);
+        slaves.put(ip+port, newSlave);
+        slavesAddrList.add(ip);
     }
 
     public void delSlave(String ip){
-        slavesIPList.remove(ip);
+        //slavesIPList.remove(ip);
         slaves.remove(ip);
     }
 
     public void pushOneJob(Job job, NetServiceProxy commander) throws IOException {
-        String targetIP = slavesIPList.get(index);
-        Slave slave = slaves.get(targetIP);
+        String targetKey = slavesAddrList.get(index);
+        index++;
+
+        if(index >= slavesAddrList.size()) index = 0;
+
+        Slave slave = slaves.get(targetKey);
 
         slave.takeNewJob(job, commander);
+
+    }
+    public void setJobStatus(String slaveKey, String jobId, String status){
+        Slave slave = slaves.get(slaveKey);
+        if(slave == null){
+            System.out.printf("Try to set a non-exist slave[%s] status\n", slaveKey);
+            return;
+        }
+        slave.setJobStatus(jobId, status);
     }
 }

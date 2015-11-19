@@ -25,10 +25,18 @@ public class Job implements JobSettings{
         userId = uid;
         this.username = username;
         jobId = UUID.randomUUID().toString();
+        status = JOB_WAITING;
     }
 
+    public String getJobId(){
+        return jobId;
+    }
+    public void setStatus(String status){
+        this.status = status;
+    }
     public Message generateMessage(){
         JSONObject json = new JSONObject();
+        json.put("jobid",jobId);
         json.put("type",type);
         json.put("url", value);
         json.put("userId", userId);
@@ -36,6 +44,16 @@ public class Job implements JobSettings{
 
         Message command = new Message(MessageTypes.DELEGATE, json.toString());
         return command;
+    }
+
+    public JSONObject getJobInJson(){
+        JSONObject json = new JSONObject();
+        json.put("jobid",jobId);
+        json.put("type",type);
+        json.put("url", value);
+        json.put("userId", userId);
+        json.put("userName", username);
+        return json;
     }
 
     public static Job getJobFromDelegateMsg(Message msg){

@@ -1,5 +1,7 @@
 package message;
 
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -19,5 +21,12 @@ public class Message implements Serializable{
     public Message(int type, String content){
         this.type = type;
         this.content = content;
+    }
+
+    public String toString(){
+        JSONObject json = new JSONObject();
+        json.put("type", type);
+        json.put("content", content);
+        return json.toString();
     }
 }
