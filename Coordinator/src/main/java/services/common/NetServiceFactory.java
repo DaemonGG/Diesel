@@ -21,7 +21,7 @@ public class NetServiceFactory {
         return new NetServiceProxy(new services.checkpoint.CheckPointService());
     }
 
-    public static NetService getCommandService(){
+    public static NetServiceProxy getCommandService(){
         return new NetServiceProxy(new services.troop.CommandService());
     }
 

@@ -15,7 +15,8 @@ public class NetConfig {
     public NetConfig(String ip, int port) throws UnknownHostException {
         IP = ip;
         this.port = port;
-        inetAddress = InetAddress.getByAddress(ip.getBytes());
+
+        inetAddress = InetAddress.getByName(ip);
     }
     public NetConfig(InetAddress addr, int port){
         inetAddress = addr;

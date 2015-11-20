@@ -16,6 +16,11 @@ import java.util.List;
  * Created by xingchij on 11/18/15.
  */
 public class AllSlaves {
+
+    /**
+     * a class representing a slave
+     * use ip + port(port for delegate tasks) to identify a slave
+     */
     class Slave {
         String ip;
         int port;
@@ -31,7 +36,9 @@ public class AllSlaves {
             this.ip = ip;
             this.port = port;
         }
-
+        public NetConfig getNetConfigOfSlave(){
+            return delegateTaskConn;
+        }
         public String getSlaveIP(){
             return ip;
         }
@@ -101,7 +108,15 @@ public class AllSlaves {
         slaves.remove(ip);
     }
 
-    public void pushOneJob(Job job, NetServiceProxy commander) throws IOException {
+    /**
+     * This function will find a slave to delegate the task, in a round robin way
+     *
+     * @param job
+     * @param commander
+     * @return the Network infoamtion of this delegated slave.
+     * @throws IOException
+     */
+    public NetConfig pushOneJob(Job job, NetServiceProxy commander) throws IOException {
         String targetKey = slavesAddrList.get(index);
         index++;
 
@@ -111,6 +126,7 @@ public class AllSlaves {
 
         slave.takeNewJob(job, commander);
 
+        return slave.getNetConfigOfSlave();
     }
     public void setJobStatus(String slaveKey, String jobId, String status){
         Slave slave = slaves.get(slaveKey);

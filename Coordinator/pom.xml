@@ -15,4 +15,15 @@
             <version>20150729</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.18749.diesel.shared.RunMain</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

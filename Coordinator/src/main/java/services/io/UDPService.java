@@ -81,7 +81,7 @@ public class UDPService implements NetService{
                 e.printStackTrace();
             }
         }catch(SocketTimeoutException e){       // timeout, only if you set the timeout in socket
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }catch (IllegalBlockingModeException e){   // connection reset
             e.printStackTrace();

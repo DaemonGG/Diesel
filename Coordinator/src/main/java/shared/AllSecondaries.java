@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class AllSecondaries {
     //private List<String> secondariesList;
-    private HashMap<String, NetConfig> secondariesMap;
+    private HashMap<String, NetConfig> secondariesMap = new HashMap<String, NetConfig>();
     int checkPort = ConnMetrics.portOfSecondaryCheckPoint;
     int num=0;
 

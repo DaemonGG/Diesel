@@ -18,10 +18,14 @@ public class NetServiceProxy implements services.io.NetService{
     }
 
     public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
-        this.netService.sendMessage(msg, serverSocket, netConf);
+        return this.netService.sendMessage(msg, serverSocket, netConf);
     }
 
     public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
         return this.netService.receiveMessage(serverSocket);
+    }
+
+    public Message recvAckMessage(DatagramSocket serverSocket) throws IOException {
+        return netService.recvAckMessage(serverSocket);
     }
 }
