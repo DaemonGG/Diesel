@@ -15,9 +15,10 @@ public class MessageTypes {
      */
     public final static int REPORT = 3;
     public final static int ACK = 4;
+    public final static int MEMBERSHIP = 5;
 
     public static boolean unknownType(int type){
-        if(type<0 || type>4) return true;
+        if(type<0 || type>5) return true;
         return false;
     }
 }

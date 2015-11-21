@@ -1,7 +1,6 @@
 package shared;
 
 import commander.Commander;
-import message.Message;
 import secondary.Secondary;
 
 import java.net.DatagramSocket;
@@ -65,15 +64,16 @@ public class RunMain {
         }
     }
 
-    public static void main(String[] args) throws SocketException {
+    public static void main(String[] args) throws SocketException, InterruptedException {
 
         RunMain machine = new RunMain(ID_PRIMARY);
 
-        while(true){
+        System.out.println(System.currentTimeMillis());
+        System.out.println(System.currentTimeMillis()/1000l);
 
-            machine.player.serve();
+        Thread.sleep(5000);
 
-        }
-
+        System.out.println(System.currentTimeMillis());
+        System.out.println(System.currentTimeMillis()/1000l);
     }
 }

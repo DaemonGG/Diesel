@@ -1,13 +1,17 @@
 package services.checkpoint;
 
+import commander.Job;
+import message.msgconstructor.CheckPointConstructor;
 import services.io.NetConfig;
 import services.io.NetService;
 import message.Message;
 import services.io.UDPService;
+import shared.ConnMetrics;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +20,8 @@ import java.util.List;
  */
 public class CheckPointService implements NetService {
     private NetService imp = new UDPService();
+
+
 
     /**
      * for now, I will send checkpoint to each secondary one by one.
@@ -31,7 +37,7 @@ public class CheckPointService implements NetService {
 
         List<InetAddress> secondaries = netConf.getBrdCastAddr();
         int port = netConf.getPort();
-        serverSocket.setSoTimeout(50000);
+        serverSocket.setSoTimeout(100000);
 
         for(InetAddress addr : secondaries) {
             try {

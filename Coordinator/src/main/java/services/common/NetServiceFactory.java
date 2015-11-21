@@ -24,5 +24,7 @@ public class NetServiceFactory {
     public static NetServiceProxy getCommandService(){
         return new NetServiceProxy(new services.troop.CommandService());
     }
-
+    public static NetServiceProxy getMembershipService(){
+        return new NetServiceProxy(new services.heartbeat.MemberShipService());
+    }
 }

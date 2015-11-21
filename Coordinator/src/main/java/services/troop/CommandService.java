@@ -24,6 +24,7 @@ public class CommandService implements NetService {
             System.out.println("wait for ack after send command. timeout");
             return false;
         }
+        serverSocket.close();
         return true;
     }
 

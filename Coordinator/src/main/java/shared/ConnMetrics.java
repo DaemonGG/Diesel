@@ -11,6 +11,7 @@ public interface ConnMetrics {
     public static final int portReceiveJobs = 8002;
     public static final int portReceiveTerminate = 9999;
     public static final int portReceiveHeartBeatFromSlave = 8003;
+    public static final int portReceiveHeartBeatFromDistributor = 8007;
     public static final int portOfCoordinatorHeartBeat = 8004;
     public static final int portOfSecondaryCheckPoint = 8005;
     public static final int portForMemberShipConfig = 8006;

@@ -1,7 +1,8 @@
 package commander;
 
 import message.Message;
-import message.checkpointpkg.CheckPointConstructor;
+import message.msgconstructor.CheckPointConstructor;
+import services.checkpoint.CheckPointService;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 
 /**
@@ -27,14 +29,16 @@ public class Commander extends Distributer {
     NetServiceProxy toSendaries = NetServiceFactory.getCheckPointService();
 
     public Commander() throws  SocketException{
+
+        id = UUID.randomUUID().toString();
         slaveOffice = AllSlaves.getOffice();
         backUps = AllSecondaries.getInstance();
         //test only
-        try {
-            backUps.addSecondary("127.0.0.1", ConnMetrics.portOfSecondaryCheckPoint);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            //backUps.addSecondary("127.0.0.1", ConnMetrics.portOfSecondaryCheckPoint);
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        }
 
         reportDock = new DatagramSocket(portReceiveReport);
         getJobDock = new DatagramSocket(portReceiveJobs);
@@ -42,6 +46,21 @@ public class Commander extends Distributer {
         reportDock.setSoTimeout(500);
         getJobDock.setSoTimeout(500);
     }
+
+    public boolean sendCheckPoint(NetConfig slave, Job newJob, NetConfig brdCastAddr){
+        Message checkAddJob = CheckPointConstructor.constructAddJobMessage(newJob, slave);
+        try {
+            toSendaries.sendMessage(checkAddJob, new DatagramSocket(), brdCastAddr);
+        }catch (SocketException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     public void serve() {
 
         /**
@@ -59,9 +78,10 @@ public class Commander extends Distributer {
             Job newJob = new Job("scroll", "www.baidu.com", 0, "jin");
             if (newJob != null) {
                 //slaveOffice.pushOneJob(newJob, toSlaves);
-                Message checkAddJob = CheckPointConstructor.constructAddJobMessage(newJob,
-                        new NetConfig("127.0.0.1",ConnMetrics.portOfSlaveDelegateTask));
-                toSendaries.sendMessage(checkAddJob, new DatagramSocket(), backUps.generateBrdCastNetConfig());
+                sendCheckPoint(
+                        new NetConfig("127.0.0.1", ConnMetrics.portOfSlaveDelegateTask),
+                        newJob,
+                        backUps.generateBrdCastNetConfig());
             } else {
                 System.out.println("Receive job from client, but not a Delegate message");
             }
@@ -70,6 +90,11 @@ public class Commander extends Distributer {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public boolean receiveMemberShipMes() {
+        return false;
     }
 
 
@@ -81,6 +106,5 @@ public class Commander extends Distributer {
             getJobDock.close();
         }
     }
-
 
 }

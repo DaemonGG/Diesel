@@ -11,6 +11,7 @@ import shared.Distributer;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.UUID;
 
 /**
  * Created by xingchij on 11/19/15.
@@ -18,9 +19,11 @@ import java.net.SocketException;
 public class Secondary extends Distributer {
     private DatagramSocket getCheckPointDock;
 
-    NetServiceProxy checkPointServive = NetServiceFactory.getCheckPointService();
+    NetServiceProxy checkPointService = NetServiceFactory.getCheckPointService();
 
     public Secondary() throws SocketException {
+        id = UUID.randomUUID().toString();
+
         slaveOffice = AllSlaves.getOffice();
         backUps = AllSecondaries.getInstance();
 
@@ -31,9 +34,8 @@ public class Secondary extends Distributer {
     @Override
     public void serve() {
 
-
         try{
-            Message check = checkPointServive.recvAckMessage(getCheckPointDock);
+            Message check = checkPointService.recvAckMessage(getCheckPointDock);
             if(check != null) {
                 System.out.println(check);
             }
@@ -41,7 +43,11 @@ public class Secondary extends Distributer {
             e.printStackTrace();
         }
 
+    }
 
+    @Override
+    public boolean receiveMemberShipMes() {
+        return false;
     }
 
     public void closeConnections() {

@@ -1,4 +1,4 @@
-package message.checkpointpkg;
+package message.msgconstructor;
 
 import commander.Job;
 import message.Message;

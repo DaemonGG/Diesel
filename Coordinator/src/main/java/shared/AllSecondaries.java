@@ -26,9 +26,9 @@ public class AllSecondaries {
         }
         return instance;
     }
-    public void addSecondary(String ip, int port) throws UnknownHostException {
+    public void addSecondary(String id, String ip, int port) throws UnknownHostException {
         NetConfig newBackup = new NetConfig(ip, port);
-        secondariesMap.put(ip+port, newBackup);
+        secondariesMap.put(id, newBackup);
         num ++;
     }
     public NetConfig generateBrdCastNetConfig(){
