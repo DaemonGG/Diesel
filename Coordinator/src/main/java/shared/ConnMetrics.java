@@ -15,7 +15,9 @@ public interface ConnMetrics {
     public static final int portOfCoordinatorHeartBeat = 8004;
     public static final int portOfSecondaryCheckPoint = 8005;
     public static final int portForMemberShipConfig = 8006;
+    public static final int portOfCoordinatorRecvJobs = 8008;
     public static final String IPOfCoordinator = "localhost";
 
     public void closeConnections();
+    public void serve() ;
 }

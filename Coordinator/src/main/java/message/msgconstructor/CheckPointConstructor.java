@@ -15,6 +15,8 @@ public class CheckPointConstructor {
     public static final String SET_JOB_STATUS = "setJobStatus";
 
     public static Message constructAddJobMessage(Job job, NetConfig slave){
+        if(job == null || slave == null) return null;
+
         JSONObject json = job.getJobInJson();
         json.put("ip", slave.getIP());
         json.put("port", slave.getPort());
@@ -23,6 +25,8 @@ public class CheckPointConstructor {
         return new Message(MessageTypes.CHECKPOINT, content);
     }
     public static Message constructAddSlaveMessage(NetConfig slave){
+        if(slave == null) return null;
+
         JSONObject json = new JSONObject();
         json.put("ip", slave.getIP());
         json.put("port", slave.getPort());
@@ -32,6 +36,8 @@ public class CheckPointConstructor {
     }
 
     public static Message constructSetJobStatusMessage(NetConfig slave, String jobId, String status){
+        if(slave == null || jobId == null || status == null) return null;
+
         JSONObject json = new JSONObject();
         json.put("ip", slave.getIP());
         json.put("port", slave.getPort());

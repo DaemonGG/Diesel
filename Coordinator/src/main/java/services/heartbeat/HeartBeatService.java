@@ -17,6 +17,7 @@ public class HeartBeatService implements NetService {
 
     public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
         imp.sendMessage(msg, serverSocket, netConf);
+        serverSocket.close();
         return true;
     }
 

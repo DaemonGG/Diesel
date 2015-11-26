@@ -8,6 +8,12 @@ import org.json.JSONObject;
  * Created by xingchij on 11/20/15.
  */
 public class HeartBeatConstructor {
+    /**
+     *
+     * @param id
+     * @param ip  Coordinator need ip when this heartbeat come from a stranger
+     * @return
+     */
     public static Message constructHeartBeat(String id, String ip){
         JSONObject json = new JSONObject();
         json.put("id", id);

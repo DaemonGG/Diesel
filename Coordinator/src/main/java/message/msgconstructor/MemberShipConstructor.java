@@ -9,10 +9,10 @@ import services.io.NetConfig;
  * Created by xingchij on 11/20/15.
  */
 public class MemberShipConstructor {
-    public static final String PRIMARYCHANGED = "primary changed";
+    //public static final String PRIMARYCHANGED = "primary changed";
     public static final String YOUAREPRIMARY = "you're primary";
     public static final String SECONDARYDEAD = "secondary dead";
-    public static final String NEWSLAVE = "new slave";
+    //public static final String NEWSLAVE = "new slave";
     public static final String NEWSECONDARY = "new secondary";
 
     public static Message primaryChangedMsgConstructor(){
@@ -23,10 +23,11 @@ public class MemberShipConstructor {
         json.put("type", YOUAREPRIMARY);
         return new Message(MessageTypes.MEMBERSHIP, json.toString());
     }
-    public static Message scondaryDeadMsgConstructor(NetConfig deadSecondary){
+    public static Message scondaryDeadMsgConstructor(String id){
         JSONObject json = new JSONObject();
-        json.put("ip", deadSecondary.getIP());
-        json.put("port", deadSecondary.getPort());
+        json.put("id", id);
+//        json.put("ip", deadSecondary.getIP());
+//        json.put("port", deadSecondary.getPort());
         json.put("type", SECONDARYDEAD);
 
         return new Message(MessageTypes.MEMBERSHIP, json.toString());

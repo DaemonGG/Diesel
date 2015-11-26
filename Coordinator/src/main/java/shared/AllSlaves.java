@@ -120,9 +120,14 @@ public class AllSlaves {
         String targetKey = slavesAddrList.get(index);
         index++;
 
+        if(targetKey == null){
+            return null;
+        }
+
         if(index >= slavesAddrList.size()) index = 0;
 
         Slave slave = slaves.get(targetKey);
+
 
         slave.takeNewJob(job, commander);
 

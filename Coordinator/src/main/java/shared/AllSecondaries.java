@@ -31,6 +31,10 @@ public class AllSecondaries {
         secondariesMap.put(id, newBackup);
         num ++;
     }
+    public void delSecondary(String id){
+        secondariesMap.remove(id);
+        num--;
+    }
     public NetConfig generateBrdCastNetConfig(){
         List<InetAddress> addresses = new ArrayList<InetAddress>();
         for(NetConfig conf : secondariesMap.values()) {

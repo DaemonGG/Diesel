@@ -10,10 +10,19 @@ import java.util.UUID;
 /**
  * Created by xingchij on 11/18/15.
  */
+
+/**
+ *  this is a Job represents a test task
+ *  Job object and "DELEGATE" Message objects can be equally transformed between each other.
+ *  NOTE: the "DELEGATE" Message sent by web client contains no JobId.
+ *        JobId is first assigned by Coordinator when received.
+ *        Master , Slaves will receive "DELEGATE" Message with a unique JobId.
+ */
+
 public class Job implements JobSettings{
-    private String type;
-    private String value;
-    private String jobId;
+    private String type;  // "scroll"  "click"
+    private String value;   // like url
+    private String jobId;   // every job will be assigned a random but unique id
     private int userId;
     private String username;
 
@@ -26,6 +35,15 @@ public class Job implements JobSettings{
         this.username = username;
         jobId = UUID.randomUUID().toString();
         status = JOB_WAITING;
+    }
+    public Job(String jobId, String type, String value, int uid, String username){
+        this.type = type;
+        this.value = value;
+        userId = uid;
+        this.username = username;
+        jobId = UUID.randomUUID().toString();
+        status = JOB_WAITING;
+        this.jobId = jobId;
     }
 
     public String getJobId(){
@@ -65,7 +83,13 @@ public class Job implements JobSettings{
             int uid = json.getInt("userId");
             String username = json.getString("userName");
 
-            return new Job(type, value, uid, username);
+            String jid = json.getString("jobid");
+
+            if(jid == null){
+                return new Job(jid, type, value, uid, username);
+            }else {
+                return new Job(type, value, uid, username);
+            }
         }
         return null;
     }

@@ -54,6 +54,10 @@ public class WatcherGroup implements ConnMetrics{
 
     public static final int ID_PRIMARY = 0;
     public static final int ID_SECONDARY = 1;
+    public static final int ID_UNKNOWN = -1;
+
+    public static final int ERR_WRONG_MSG_TYPE = -10;
+
     public static final int HEALTH_HEALTHY = 2;
     public static final int HEALTH_DEAD = 3;
     public static final long TIMEOUT = 120000;
@@ -72,6 +76,10 @@ public class WatcherGroup implements ConnMetrics{
        heartBeatDock.close();
     }
 
+    public void serve() {
+
+    }
+
     public WatcherGroup() throws SocketException {
         heartBeatDock = new DatagramSocket(ConnMetrics.portReceiveHeartBeatFromDistributor);
         heartBeatDock.setSoTimeout(5000);
@@ -83,9 +91,12 @@ public class WatcherGroup implements ConnMetrics{
 //        group.put(p.getRepresentedId(), p);
 //    }
 
-    public void addBackUp(String id, String ip, int port) throws UnknownHostException {
+    public NetConfig getPrimary(){
+        if(primary == null) return null;
+        return primary.getConn();
+    }
+    private void addBackUp(String id, String ip, int port) throws UnknownHostException {
         Watcher b = new Watcher(id , ip, port, ID_SECONDARY);
-
 
         /*
             set the first participating backup to be the next primary
@@ -94,32 +105,43 @@ public class WatcherGroup implements ConnMetrics{
             nextPrimary = b;
         }
         if(primary != null && announceNewSecondary(b) == false){
-            System.out.println("Tell promary to add new secondary fail");
+            System.out.println("Announce to add new secondary totally fail");
             return;
         }
         group.put(b.getRepresentedId(), b);
         backUpGroup.put(b.getRepresentedId(), b);
+        watcherNum ++;
     }
 
     private boolean announceNewSecondary(Watcher newOne){
         Message newSecondaryMsg = MemberShipConstructor.newSecondaryMemberMsgConstructor
                     (newOne.getRepresentedId(), newOne.getConn());
-        boolean _success = true;
+
+        try {
+
+            boolean _success = membershipService.sendMessage(newSecondaryMsg, new DatagramSocket(), primary.getConn());
+            if(_success == false) return false;         // if announce to primary fails, the function return as false
+
             /**
-             * tell everyone in the group that there's a new guy
+             * tell all backups that there's a new guy
+             * I will return true, if even only one success.
              */
-            for(Watcher w : group.values()) {
+            for (Watcher w : backUpGroup.values()) {
 
                 try {
                     membershipService.sendMessage(newSecondaryMsg, new DatagramSocket(), w.getConn());
+
                 } catch (IOException e) {
                     e.printStackTrace();
-                    _success = false;
                 }
 
             }
+        }catch (IOException e){
+            e.printStackTrace();
 
-        return _success;
+        }
+
+        return true;    // otherwise return true
     }
 
     /**
@@ -127,7 +149,7 @@ public class WatcherGroup implements ConnMetrics{
      * and choose the next secondary be a possible primary
      * @return
      */
-    public boolean changePrimary() {
+    private boolean changePrimary() {
         if(nextPrimary == null){
             System.out.println("No backup remaining...system crash..");
             return false;
@@ -136,8 +158,13 @@ public class WatcherGroup implements ConnMetrics{
             Message assignPrimary = MemberShipConstructor.youArePrimaryMsgConstructor();
             membershipService.sendMessage(assignPrimary, new DatagramSocket(), nextPrimary.getConn());
 
+            // the primary is dead, remove it from list
+            if(primary !=null && group.containsKey(primary.getRepresentedId())) {
+                group.remove(primary.getRepresentedId());
+            }
+
             primary = nextPrimary;
-            primary.identity = ID_PRIMARY;
+            primary.changeIdentity(ID_PRIMARY);
             backUpGroup.remove(nextPrimary.getRepresentedId());
 
             if (backUpGroup.isEmpty()) {
@@ -155,11 +182,33 @@ public class WatcherGroup implements ConnMetrics{
         return true;
     }
 
+    /**
+     *  Tell all primary, secondaries, that some secondary is now dead
+     * @param deadOne
+     * @return This function will return false only when announce to primary fail.
+     */
     private boolean announceSecondaryDead(Watcher deadOne){
         NetConfig deadSecondary = deadOne.getConn();
-        Message announceDeadSecondary = MemberShipConstructor.scondaryDeadMsgConstructor(deadSecondary);
+        Message announceDeadSecondary = MemberShipConstructor.scondaryDeadMsgConstructor(deadOne.getRepresentedId());
         try {
-            membershipService.sendMessage(announceDeadSecondary, new DatagramSocket(), primary.getConn());
+            boolean _success = membershipService.sendMessage(announceDeadSecondary, new DatagramSocket(), primary.getConn());
+            if(_success == false) return false;         // if announce to primary fails, the function return as false
+
+            /**
+             * tell all backups that there's a new guy
+             * I will return true, if even only one success.
+             */
+            for (Watcher w : backUpGroup.values()) {
+
+                try {
+                    membershipService.sendMessage(announceDeadSecondary, new DatagramSocket(), w.getConn());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            //membershipService.sendMessage(announceDeadSecondary, new DatagramSocket(), primary.getConn());
         }catch (IOException e){
             e.printStackTrace();
             return false;
@@ -167,9 +216,17 @@ public class WatcherGroup implements ConnMetrics{
         return true;
     }
 
-    public boolean watchForHeartBeat() throws IOException {
+    /**
+     *  Listen for heart beat message, register new secondary when new member send heart beat.
+     *  NOTE: Secondary choose his own id, and tell Coordinator his id.
+     * @return The ID number of whom that sent the heart beat message
+     * @throws IOException
+     */
+    public int watchForHeartBeat() throws IOException {
         Message hbt = heartBeatService.receiveMessage(heartBeatDock);
-        if (hbt == null) return false;
+        if (hbt == null) return ID_UNKNOWN;
+
+        int who = -1;
         if(hbt.getType() == MessageTypes.HEARTBEAT){
 
             String content = hbt.getContent();
@@ -178,25 +235,40 @@ public class WatcherGroup implements ConnMetrics{
 
             Watcher theOne = group.get(distributorId);
 
+            /**
+             * if I can not find the distributor, I will register this new guy
+             * add him as a backup.
+             * if right now, no primary, which means it's now a very starting point
+             * I will automatically change this backup to be primary. and send message
+             * telling him about my decision
+             */
             if(theOne == null){
                 String ip = json.getString("ip");
-                Watcher newDistributor = null;
 
                 addBackUp(distributorId, ip, portForMemberShipConfig);
 
-                if(primary != null) {
+                if(primary == null) {
                     changePrimary();
+                    who = ID_PRIMARY;
                 }else{
-
+                    who = ID_SECONDARY;
+                }
+            }else{
+                if(theOne.identity == ID_PRIMARY) {
+                    who = ID_PRIMARY;
+                }else if(theOne.identity == ID_SECONDARY){
+                    who = ID_SECONDARY;
+                }else{
+                    who = ID_UNKNOWN;
                 }
             }
 
             theOne.lastUpdate = System.currentTimeMillis();
             theOne.health_state = HEALTH_HEALTHY;
-            return true;
+            return who;
 
         }else{
-            return false;
+            return ERR_WRONG_MSG_TYPE;
         }
 
 
@@ -205,10 +277,13 @@ public class WatcherGroup implements ConnMetrics{
     public void checkDead(){
         for(Watcher monitor : group.values()){
             if(monitor.isTimeout()){
+                watcherNum --;
+                monitor.health_state = HEALTH_DEAD;
 
                 if(monitor.whoIRepresent() == ID_PRIMARY){
                     if(changePrimary() == false){
                         System.out.println("No Primary alive, system crashed...");
+                        primary = null;
                         System.exit(1);
                     }else{
                         System.out.println("Found Primary Dead, change selected a new one");
@@ -228,6 +303,7 @@ public class WatcherGroup implements ConnMetrics{
                 }
 
             }else{
+
 
             }
         }
