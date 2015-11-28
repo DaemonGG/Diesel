@@ -15,7 +15,10 @@ import java.io.WriteAbortedException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by xingchij on 11/20/15.
@@ -291,7 +294,12 @@ public class WatcherGroup implements ConnMetrics{
     }
 
     public void checkDead(){
+        Collection<Watcher> allMonitors = new ArrayList<Watcher>();
         for(Watcher monitor : group.values()){
+            allMonitors.add(monitor);
+        }
+
+        for(Watcher monitor : allMonitors){
             if(monitor.isTimeout()){
                 watcherNum --;
                 monitor.health_state = HEALTH_DEAD;
