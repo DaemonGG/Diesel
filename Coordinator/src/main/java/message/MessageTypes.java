@@ -21,4 +21,32 @@ public class MessageTypes {
         if(type<0 || type>5) return true;
         return false;
     }
+
+    public static String explain(int type){
+        if(unknownType(type)) return "Unknown";
+        String explain = null;
+        switch(type){
+            case CHECKPOINT:
+                explain = "CheckPoint";
+                break;
+            case HEARTBEAT:
+                explain = "HeartBeat";
+                break;
+            case DELEGATE:
+                explain = "Delegate";
+                break;
+            case REPORT:
+                explain = "Report";
+                break;
+            case ACK:
+                explain = "ACK";
+                break;
+            case MEMBERSHIP:
+                explain = "MemberShip";
+                break;
+            default:
+                break;
+        }
+        return explain;
+    }
 }

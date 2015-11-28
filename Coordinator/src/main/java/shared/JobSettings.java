@@ -1,4 +1,4 @@
-package commander;
+package shared;
 
 /**
  * Created by xingchij on 11/18/15.

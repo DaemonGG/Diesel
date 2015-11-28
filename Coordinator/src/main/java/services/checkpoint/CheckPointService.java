@@ -1,18 +1,13 @@
 package services.checkpoint;
 
-import commander.Job;
-import message.msgconstructor.CheckPointConstructor;
 import services.io.NetConfig;
 import services.io.NetService;
 import message.Message;
 import services.io.UDPService;
-import shared.ConnMetrics;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

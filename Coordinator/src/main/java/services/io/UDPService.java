@@ -16,6 +16,7 @@ import java.nio.channels.IllegalBlockingModeException;
 public class UDPService implements NetService{
 
     public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
+        if(netConf == null || msg == null || serverSocket == null) return false;
         ByteArrayOutputStream objBytesStream = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(objBytesStream);
         out.writeObject(msg);
@@ -52,7 +53,7 @@ public class UDPService implements NetService{
                 e.printStackTrace();
             }
         }catch(SocketTimeoutException e){       // timeout, only if you set the timeout in socket
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }catch (IllegalBlockingModeException e){   // connection reset
             e.printStackTrace();

@@ -21,7 +21,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>org.18749.diesel.shared.RunMain</mainClass>
+                    <mainClass>org.18749.diesel.distributor.RunMain</mainClass>
                 </configuration>
             </plugin>
         </plugins>

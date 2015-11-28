@@ -1,5 +1,6 @@
-package commander;
+package shared;
 
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import org.json.JSONObject;
@@ -19,7 +20,7 @@ import java.util.UUID;
  *        Master , Slaves will receive "DELEGATE" Message with a unique JobId.
  */
 
-public class Job implements JobSettings{
+public class Job implements JobSettings {
     private String type;  // "scroll"  "click"
     private String value;   // like url
     private String jobId;   // every job will be assigned a random but unique id
@@ -74,7 +75,9 @@ public class Job implements JobSettings{
         return json;
     }
 
-    public static Job getJobFromDelegateMsg(Message msg){
+    public static Job getJobFromDelegateMsg(Message msg) throws WrongMessageTypeException {
+        if(msg == null)
+            return null;
         if(msg.getType() == (MessageTypes.DELEGATE)){
             String content = msg.getContent();
             JSONObject json = new JSONObject(content);
@@ -90,7 +93,8 @@ public class Job implements JobSettings{
             }else {
                 return new Job(type, value, uid, username);
             }
+        }else{
+            throw new WrongMessageTypeException(msg.getType(), MessageTypes.DELEGATE);
         }
-        return null;
     }
 }

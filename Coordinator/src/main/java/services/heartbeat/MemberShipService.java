@@ -14,7 +14,8 @@ import java.net.DatagramSocket;
 public class MemberShipService implements NetService {
     NetService imp = new UDPService();
     public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
-        imp.sendMessage(msg, serverSocket, netConf);
+        if(imp.sendMessage(msg, serverSocket, netConf) == false)
+            return false;
 
         serverSocket.setSoTimeout(20000);
 
@@ -33,6 +34,6 @@ public class MemberShipService implements NetService {
     }
 
     public Message recvAckMessage(DatagramSocket serverSocket) throws IOException {
-        return null;
+        return imp.recvAckMessage(serverSocket);
     }
 }

@@ -1,5 +1,6 @@
 package healthchecker;
-import commander.Job;
+import error.WrongMessageTypeException;
+import shared.Job;
 import message.Message;
 import message.MessageTypes;
 import services.common.NetServiceFactory;
@@ -69,6 +70,9 @@ public class TaskReceiver implements  Runnable, ConnMetrics {
             Job newJob = Job.getJobFromDelegateMsg(newTask);
             addJob(newJob);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (WrongMessageTypeException e) {
+            System.out.println(e.toString());
             e.printStackTrace();
         }
     }

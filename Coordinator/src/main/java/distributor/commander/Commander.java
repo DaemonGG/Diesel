@@ -1,20 +1,19 @@
-package commander;
+package distributor.commander;
 
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.CheckPointConstructor;
 import message.msgconstructor.MemberShipConstructor;
 import org.json.JSONObject;
-import services.checkpoint.CheckPointService;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
-import services.io.NetService;
 import shared.AllSecondaries;
 import shared.AllSlaves;
-import shared.ConnMetrics;
-import shared.Distributer;
-import sun.nio.ch.Net;;
+import distributor.Distributer;
+import shared.Job;
+;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -34,9 +33,12 @@ public class Commander extends Distributer {
     NetServiceProxy toSendaries = NetServiceFactory.getCheckPointService();
     NetServiceProxy reportService = NetServiceFactory.getRawUDPService();
 
-    public Commander() throws  SocketException{
+    public Commander(String id) throws SocketException, UnknownHostException {
 
-        id = UUID.randomUUID().toString();
+        ip = NetConfig.getMyIp();
+        this.id = id;
+        coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
+
         slaveOffice = AllSlaves.getOffice();
         backUps = AllSecondaries.getInstance();
         //test only
@@ -65,19 +67,20 @@ public class Commander extends Distributer {
          * and delegate task to slaves
          */
         try {
-//            Message newTestMsg = toSlaves.recvAckMessage(getJobDock);
-//            Job newJob = Job.getJobFromDelegateMsg(newTestMsg);
-            Job newJob = new Job("scroll", "www.baidu.com", 0, "jin");
+            Message newTestMsg = toSlaves.recvAckMessage(getJobDock);
+            Job newJob = Job.getJobFromDelegateMsg(newTestMsg);
+            //Job newJob = new Job("scroll", "www.baidu.com", 0, "jin");
             if (newJob != null) {
                 NetConfig slave = slaveOffice.pushOneJob(newJob, toSlaves);
 
                 Message checkAddJob = CheckPointConstructor.constructAddJobMessage(newJob, slave);
                 sendCheckPoint(checkAddJob);
-            } else {
-                System.out.println("Receive job from client, but not a Delegate message");
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (WrongMessageTypeException e) {
+            System.out.println(e.toString());
             e.printStackTrace();
         }
 
@@ -89,6 +92,9 @@ public class Commander extends Distributer {
         try {
             workOnReport();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (WrongMessageTypeException e){
+            System.out.println(e);
             e.printStackTrace();
         }
     }
@@ -123,19 +129,29 @@ public class Commander extends Distributer {
         return true;
     }
 
-    public boolean workOnReport() throws IOException {
+    /**
+     * Get report from slave.
+     * UNFINISHED: I need id of this slave
+     * @return
+     * @throws IOException
+     */
+    public boolean workOnReport() throws IOException, WrongMessageTypeException{
         Message report = reportService.recvAckMessage(reportDock);
+
+        if(report == null) return true;
+
         if(report.getType() != MessageTypes.REPORT){
-            System.out.println("Get wrong type from report dock");
             System.out.println(report);
-            return false;
+            throw new WrongMessageTypeException(report.getType(), MessageTypes.REPORT);
+        }else{
+            System.out.println(report);
         }
-        System.out.println(report);
+
         return true;
     }
 
     @Override
-    public boolean dealWithMemberShipMsg(Message msg) {
+    public boolean dealWithMemberShipMsg(Message msg)  {
         if(msg.getType() != MessageTypes.MEMBERSHIP){
             System.out.printf("Receive wrong type from membership dock: %d\n", msg.getType());
             return false;

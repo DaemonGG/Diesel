@@ -1,6 +1,6 @@
 package message.msgconstructor;
 
-import commander.Job;
+import shared.Job;
 import message.Message;
 import message.MessageTypes;
 import org.json.JSONObject;

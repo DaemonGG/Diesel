@@ -1,5 +1,6 @@
 package healthchecker;
 
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.MemberShipConstructor;
@@ -10,6 +11,7 @@ import services.io.NetConfig;
 import shared.ConnMetrics;
 
 import java.io.IOException;
+import java.io.WriteAbortedException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -44,7 +46,7 @@ public class WatcherGroup implements ConnMetrics{
         void changeIdentity(int identity){
             this.identity = identity;
         }
-        int whoIRepresent(){
+        int whatIRepresent(){
             return identity;
         }
         NetConfig getConn(){
@@ -56,11 +58,9 @@ public class WatcherGroup implements ConnMetrics{
     public static final int ID_SECONDARY = 1;
     public static final int ID_UNKNOWN = -1;
 
-    public static final int ERR_WRONG_MSG_TYPE = -10;
-
     public static final int HEALTH_HEALTHY = 2;
     public static final int HEALTH_DEAD = 3;
-    public static final long TIMEOUT = 120000;
+    public static final long TIMEOUT = 12000;
     public int watcherNum = 0;
     Watcher nextPrimary = null;
     Watcher primary = null;
@@ -81,7 +81,7 @@ public class WatcherGroup implements ConnMetrics{
     }
 
     public WatcherGroup() throws SocketException {
-        heartBeatDock = new DatagramSocket(ConnMetrics.portReceiveHeartBeatFromDistributor);
+        heartBeatDock = new DatagramSocket(portOfCoordinatorHeartBeat);
         heartBeatDock.setSoTimeout(5000);
     }
 
@@ -98,16 +98,18 @@ public class WatcherGroup implements ConnMetrics{
     private void addBackUp(String id, String ip, int port) throws UnknownHostException {
         Watcher b = new Watcher(id , ip, port, ID_SECONDARY);
 
-        /*
+
+        if(primary != null && announceNewSecondary(b) == false){
+            System.out.println("Announce to add new secondary totally fail");
+            return;
+        }
+         /*
             set the first participating backup to be the next primary
          */
         if(nextPrimary == null){
             nextPrimary = b;
         }
-        if(primary != null && announceNewSecondary(b) == false){
-            System.out.println("Announce to add new secondary totally fail");
-            return;
-        }
+
         group.put(b.getRepresentedId(), b);
         backUpGroup.put(b.getRepresentedId(), b);
         watcherNum ++;
@@ -156,9 +158,11 @@ public class WatcherGroup implements ConnMetrics{
         }
         try {
             Message assignPrimary = MemberShipConstructor.youArePrimaryMsgConstructor();
-            membershipService.sendMessage(assignPrimary, new DatagramSocket(), nextPrimary.getConn());
+            System.out.printf("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
+                    nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
+            boolean success = membershipService.sendMessage(assignPrimary, new DatagramSocket(), nextPrimary.getConn());
 
-            // the primary is dead, remove it from list
+            // the old primary is dead, remove it from list
             if(primary !=null && group.containsKey(primary.getRepresentedId())) {
                 group.remove(primary.getRepresentedId());
             }
@@ -168,12 +172,10 @@ public class WatcherGroup implements ConnMetrics{
             backUpGroup.remove(nextPrimary.getRepresentedId());
 
             if (backUpGroup.isEmpty()) {
+                System.out.println("NO Secondary remaining...");
                 nextPrimary = null;
             } else {
-                for (Watcher w : backUpGroup.values()) {
-                    nextPrimary = w;
-                    break;
-                }
+                setNextPrimary();
             }
         }catch (IOException e){
             e.printStackTrace();
@@ -182,6 +184,13 @@ public class WatcherGroup implements ConnMetrics{
         return true;
     }
 
+    private void setNextPrimary(){
+        nextPrimary = null;
+        for (Watcher w : backUpGroup.values()) {
+            nextPrimary = w;
+            break;
+        }
+    }
     /**
      *  Tell all primary, secondaries, that some secondary is now dead
      * @param deadOne
@@ -222,7 +231,7 @@ public class WatcherGroup implements ConnMetrics{
      * @return The ID number of whom that sent the heart beat message
      * @throws IOException
      */
-    public int watchForHeartBeat() throws IOException {
+    public int watchForHeartBeat() throws IOException, WrongMessageTypeException {
         Message hbt = heartBeatService.receiveMessage(heartBeatDock);
         if (hbt == null) return ID_UNKNOWN;
 
@@ -235,6 +244,7 @@ public class WatcherGroup implements ConnMetrics{
 
             Watcher theOne = group.get(distributorId);
 
+
             /**
              * if I can not find the distributor, I will register this new guy
              * add him as a backup.
@@ -244,16 +254,22 @@ public class WatcherGroup implements ConnMetrics{
              */
             if(theOne == null){
                 String ip = json.getString("ip");
-
+                System.out.printf("Find new distributor[id: %s, ip: %s], register it\n",
+                        distributorId, ip);
                 addBackUp(distributorId, ip, portForMemberShipConfig);
 
                 if(primary == null) {
-                    changePrimary();
-                    who = ID_PRIMARY;
+                    System.out.println("This new distributor will be primary...");
+                    if(changePrimary()) {
+                        who = ID_PRIMARY;
+                    }
                 }else{
                     who = ID_SECONDARY;
                 }
             }else{
+                System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
+                        theOne.getRepresentedId(), theOne.getConn().getIP());
+
                 if(theOne.identity == ID_PRIMARY) {
                     who = ID_PRIMARY;
                 }else if(theOne.identity == ID_SECONDARY){
@@ -261,14 +277,14 @@ public class WatcherGroup implements ConnMetrics{
                 }else{
                     who = ID_UNKNOWN;
                 }
+                theOne.lastUpdate = System.currentTimeMillis();
+                theOne.health_state = HEALTH_HEALTHY;
             }
 
-            theOne.lastUpdate = System.currentTimeMillis();
-            theOne.health_state = HEALTH_HEALTHY;
             return who;
 
         }else{
-            return ERR_WRONG_MSG_TYPE;
+            throw new WrongMessageTypeException(hbt.getType(), MessageTypes.HEARTBEAT);
         }
 
 
@@ -280,18 +296,34 @@ public class WatcherGroup implements ConnMetrics{
                 watcherNum --;
                 monitor.health_state = HEALTH_DEAD;
 
-                if(monitor.whoIRepresent() == ID_PRIMARY){
+                if(monitor.whatIRepresent() == ID_PRIMARY){
+                    System.out.println("Find primary dead, choose a new one..");
                     if(changePrimary() == false){
                         System.out.println("No Primary alive, system crashed...");
                         primary = null;
                         System.exit(1);
                     }else{
-                        System.out.println("Found Primary Dead, change selected a new one");
+                        System.out.println("Found Primary Dead, selected a new one");
                     }
 
-                }else if(monitor.whoIRepresent() == ID_SECONDARY){
-                    System.out.printf("Found secondary %s:%d daed\n",
-                            monitor.getConn().getIP(), monitor.getConn().getInetAddress());
+                }else if(monitor.whatIRepresent() == ID_SECONDARY){
+
+                    System.out.printf("Found secondary [id: %s, ip: %s] daed\n",
+                            monitor.getRepresentedId(), monitor.getConn().getIP());
+                    String id = monitor.getRepresentedId();
+
+                    // if the dead secondary is the next primary, select another "nextPrimary"
+                    if(id.equals(nextPrimary.getRepresentedId())){
+                        setNextPrimary();
+                    }
+                    // remove this secondary from list
+                    if(backUpGroup.containsKey(id)){
+                        backUpGroup.remove(id);
+                    }
+                    if(group.containsKey(id)){
+                        group.remove(id);
+                    }
+
                     if(announceSecondaryDead(monitor) == false){
                        System.out.println("\tUnable to fix");
                     }else {

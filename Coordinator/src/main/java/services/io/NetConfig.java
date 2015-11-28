@@ -1,7 +1,7 @@
 package services.io;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -38,4 +38,28 @@ public class NetConfig {
     public int getPort(){
         return port;
     }
+
+    public static String getMyIp() throws SocketException {
+        String myip = null;
+        NetworkInterface ni = NetworkInterface.getByName("en0");
+        Enumeration inetAddress = ni.getInetAddresses();
+
+        if(!inetAddress.hasMoreElements()){
+            return null;
+        }
+
+        InetAddress addr = (InetAddress) inetAddress.nextElement();
+
+        while(inetAddress.hasMoreElements())
+        {
+            addr = (InetAddress) inetAddress.nextElement();
+            if(addr instanceof Inet4Address && !addr.isLoopbackAddress())
+            {
+                myip = addr.getHostAddress();
+                break;
+            }
+        }
+        return myip;
+    }
+
 }

@@ -1,15 +1,17 @@
-package secondary;
+package distributor.secondary;
 
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.MemberShipConstructor;
 import org.json.JSONObject;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
+import services.io.NetConfig;
 import shared.AllSecondaries;
 import shared.AllSlaves;
 import shared.ConnMetrics;
-import shared.Distributer;
+import distributor.Distributer;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -25,8 +27,10 @@ public class Secondary extends Distributer {
 
     NetServiceProxy checkPointService = NetServiceFactory.getCheckPointService();
 
-    public Secondary() throws SocketException {
-        id = UUID.randomUUID().toString();
+    public Secondary(String id) throws SocketException, UnknownHostException {
+        ip = NetConfig.getMyIp();
+        this.id = id;
+        coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
 
         slaveOffice = AllSlaves.getOffice();
         backUps = AllSecondaries.getInstance();

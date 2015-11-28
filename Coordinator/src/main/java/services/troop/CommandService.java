@@ -14,7 +14,8 @@ import java.net.DatagramSocket;
 public class CommandService implements NetService {
     private NetService imp = new UDPService();
     public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
-        imp.sendMessage(msg, serverSocket, netConf);
+        if(imp.sendMessage(msg, serverSocket, netConf) == false)
+            return false;
 
         serverSocket.setSoTimeout(5000);
 

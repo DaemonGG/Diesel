@@ -1,6 +1,5 @@
 package shared;
 
-import commander.Job;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
 

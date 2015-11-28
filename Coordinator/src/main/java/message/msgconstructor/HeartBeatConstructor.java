@@ -10,7 +10,7 @@ import org.json.JSONObject;
 public class HeartBeatConstructor {
     /**
      *
-     * @param id
+     * @param id  id of this distributor
      * @param ip  Coordinator need ip when this heartbeat come from a stranger
      * @return
      */

@@ -1,17 +1,22 @@
-package shared;
+package distributor;
 
-import commander.Commander;
+import distributor.commander.Commander;
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.MemberShipConstructor;
 import org.json.JSONObject;
-import secondary.Secondary;
+import distributor.secondary.Secondary;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
+import shared.ConnMetrics;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.UUID;
 
 /**
  * Created by xingchij on 11/19/15.
@@ -20,7 +25,11 @@ public class RunMain {
     public static final int ID_PRIMARY = 0;
     public static final int ID_SECONDARY = 1;
 
+    public static final int RECV_MEMBERSHIP_TIMEOUT = 50;
+    public static final int RECV_TERMINATE_TIMEOUT = 30;
+
     int identity;
+    String id;
     private DatagramSocket terminateDock = null;
     private DatagramSocket memberShipChangeDock = null;
 
@@ -29,28 +38,34 @@ public class RunMain {
     private NetServiceProxy membershipService = NetServiceFactory.getMembershipService();
 
 
-    public RunMain(int identity) throws SocketException {
-        //terminateDock = new DatagramSocket(ConnMetrics.portReceiveTerminate);
-        //getMemberShipChangeDock = new DatagramSocket(ConnMetrics.portForMemberShipConfig);
+    public RunMain(int identity) throws SocketException, UnknownHostException {
+        id = UUID.randomUUID().toString();
 
-        //getMemberShipChangeDock.setSoTimeout(50);
-        //terminateDock.setSoTimeout(30);
+        terminateDock = new DatagramSocket(ConnMetrics.portReceiveTerminate);
+        memberShipChangeDock = new DatagramSocket(ConnMetrics.portForMemberShipConfig);
+
+        memberShipChangeDock.setSoTimeout(RECV_MEMBERSHIP_TIMEOUT);
+        terminateDock.setSoTimeout(RECV_TERMINATE_TIMEOUT);
+
+        this.identity = identity;
         if(identity == ID_PRIMARY){
-            this.player = new Commander();
+            this.player = new Commander(id);
         }else if(identity == ID_SECONDARY){
-            this.player = new Secondary();
+            this.player = new Secondary(id);
         }else{
             System.out.println("Who I am ?");
         }
     }
 
-    public boolean listenmemberShipChange() throws IOException {
+    public boolean listenmemberShipChange() throws IOException, WrongMessageTypeException {
         Message memberShipMsg = membershipService.recvAckMessage(memberShipChangeDock);
+
+        if(memberShipMsg == null) return true;
 
         if(memberShipMsg.getType() != MessageTypes.MEMBERSHIP){
             System.out.printf("Receive wrong type from membership dock: %d\n",
                     memberShipMsg.getType());
-            return false;
+            throw new WrongMessageTypeException(memberShipMsg.getType(), MessageTypes.MEMBERSHIP);
         }
 
         String content = memberShipMsg.getContent();
@@ -60,7 +75,9 @@ public class RunMain {
             Then identity type change
          */
         if( type.equals(MemberShipConstructor.YOUAREPRIMARY) ){
+            System.out.printf("GET YOUAREPRIMARY, I AM %d\n", identity);
             if(identity == ID_SECONDARY) {
+                System.out.println("I am becoming a primary");
                 switchIdentiry(ID_PRIMARY);
             }
             return true;
@@ -69,18 +86,18 @@ public class RunMain {
         }
 
     }
-    private void switchIdentiry(int identity) throws SocketException {
+    private void switchIdentiry(int identity) throws SocketException, UnknownHostException {
         if(identity == ID_PRIMARY && whoIAm() != ID_PRIMARY){
             if(player != null){
                 player.closeConnections();
             }
-            player = new Commander();
+            player = new Commander(id);
             this.identity = identity;
         }else if(identity == ID_SECONDARY && whoIAm() != ID_SECONDARY){
             if(player != null){
                 player.closeConnections();
             }
-            player = new Secondary();
+            player = new Secondary(id);
             this.identity = identity;
         }else{
             System.out.println("Illegal change of identity");
@@ -110,22 +127,28 @@ public class RunMain {
                 listenmemberShipChange();
                 player.serve();
 
-            }catch (IOException e){
+            } catch (InterruptedIOException e){
+                closeConnections();
+                System.out.println("Distributor terminated. All resources released");
+                return;
+            } catch (IOException e){
+                e.printStackTrace();
+            }catch (WrongMessageTypeException e){
+                System.out.println(e);
                 e.printStackTrace();
             }
         }
     }
 
-    public static void main(String[] args) throws SocketException, InterruptedException {
-
-        RunMain machine = new RunMain(ID_PRIMARY);
-
-        System.out.println(System.currentTimeMillis());
-        System.out.println(System.currentTimeMillis()/1000l);
-
-        Thread.sleep(5000);
-
-        System.out.println(System.currentTimeMillis());
-        System.out.println(System.currentTimeMillis()/1000l);
+    public static void main(String[] args) throws SocketException {
+        RunMain machine = null;
+        try {
+            machine = new RunMain(ID_SECONDARY);
+            System.out.printf("Distributor[id: %s, ip: %s] running, I am now secondary\n",
+                    machine.player.id, machine.player.ip);
+            machine.run();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 }
