@@ -46,6 +46,14 @@ public class Job implements JobSettings {
         status = JOB_WAITING;
         this.jobId = jobId;
     }
+    public Job(JSONObject jobjson){
+        this.jobId = jobjson.getString("jobid");
+        this.type = jobjson.getString("type");
+        this.value = jobjson.getString("url");
+
+        this.userId = jobjson.getInt("userId");
+        this.username = jobjson.getString("userName");
+    }
 
     public String getJobId(){
         return jobId;

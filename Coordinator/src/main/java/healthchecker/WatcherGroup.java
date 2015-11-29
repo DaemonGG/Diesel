@@ -4,6 +4,7 @@ import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.MemberShipConstructor;
+import message.msgconstructor.WhoIsPrimaryConstructor;
 import org.json.JSONObject;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
@@ -64,6 +65,10 @@ public class WatcherGroup implements ConnMetrics{
     public static final int HEALTH_HEALTHY = 2;
     public static final int HEALTH_DEAD = 3;
     public static final long TIMEOUT = 12000;
+
+    public static final int RECV_HEARTBEAT_TIMEOUT = 5000;
+    public static final int RECV_WHOISPRIMARY_TIMEOUT = 20;
+
     public int watcherNum = 0;
     Watcher nextPrimary = null;
     Watcher primary = null;
@@ -72,11 +77,14 @@ public class WatcherGroup implements ConnMetrics{
     HashMap<String, Watcher> backUpGroup = new HashMap<String, Watcher>();
 
     DatagramSocket heartBeatDock;
-    NetServiceProxy heartBeatService = NetServiceFactory.getHeartBeatService();
-    NetServiceProxy membershipService = NetServiceFactory.getMembershipService();
+    DatagramSocket whoIsPrimaryDock;
+    NetServiceProxy tellAboutPrimaryService;
+    NetServiceProxy heartBeatService ;
+    NetServiceProxy membershipService;
 
     public void closeConnections() {
-       heartBeatDock.close();
+        whoIsPrimaryDock.close();
+        heartBeatDock.close();
     }
 
     public void serve() {
@@ -85,14 +93,15 @@ public class WatcherGroup implements ConnMetrics{
 
     public WatcherGroup() throws SocketException {
         heartBeatDock = new DatagramSocket(portOfCoordinatorHeartBeat);
-        heartBeatDock.setSoTimeout(5000);
-    }
+        heartBeatDock.setSoTimeout(RECV_HEARTBEAT_TIMEOUT);
 
-//    public void addPrimary(String id, String ip, int port) throws UnknownHostException {
-//        Watcher p = new Watcher( id, ip, port, ID_PRIMARY);
-//        primary = p;
-//        group.put(p.getRepresentedId(), p);
-//    }
+        whoIsPrimaryDock = new DatagramSocket(portOfCoordinatorForPrimaryAddr);
+        whoIsPrimaryDock.setSoTimeout(RECV_WHOISPRIMARY_TIMEOUT);
+
+        heartBeatService = NetServiceFactory.getHeartBeatService();
+        membershipService = NetServiceFactory.getMembershipService();
+        tellAboutPrimaryService = NetServiceFactory.getRawUDPService();
+    }
 
     public NetConfig getPrimary(){
         if(primary == null) return null;
@@ -347,5 +356,27 @@ public class WatcherGroup implements ConnMetrics{
 
             }
         }
+    }
+
+    public void watchForWhoIsPrimary() throws IOException, WrongMessageTypeException {
+        Message query = tellAboutPrimaryService.receiveMessage(whoIsPrimaryDock);
+
+        if(query == null) return;
+
+        if(query.getType() != MessageTypes.WHOISPRIMARY){
+            throw new WrongMessageTypeException(query.getType(), MessageTypes.WHOISPRIMARY);
+        }
+
+        String content = query.getContent();
+        JSONObject json = new JSONObject(content);
+        String ip = json.getString("sip");
+        int port = json.getInt("port");
+
+        if(primary == null){
+            System.out.println("Err: Get query for primary, but primary is None");
+            return;
+        }
+        Message answer = WhoIsPrimaryConstructor.constructAnswer(primary.getConn().getIP());
+        tellAboutPrimaryService.sendMessage(answer, whoIsPrimaryDock, new NetConfig(ip, port));
     }
 }

@@ -16,9 +16,11 @@ public class MessageTypes {
     public final static int REPORT = 3;
     public final static int ACK = 4;
     public final static int MEMBERSHIP = 5;
+    public final static int WHOISPRIMARY = 6;
+
 
     public static boolean unknownType(int type){
-        if(type<0 || type>5) return true;
+        if(type<0 || type>6) return true;
         return false;
     }
 
@@ -44,6 +46,8 @@ public class MessageTypes {
             case MEMBERSHIP:
                 explain = "MemberShip";
                 break;
+            case WHOISPRIMARY:
+                explain = "Who is Primary";
             default:
                 break;
         }

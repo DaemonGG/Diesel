@@ -71,7 +71,7 @@ public class Commander extends Distributer {
             Job newJob = Job.getJobFromDelegateMsg(newTestMsg);
             //Job newJob = new Job("scroll", "www.baidu.com", 0, "jin");
             if (newJob != null) {
-                NetConfig slave = slaveOffice.pushOneJob(newJob, toSlaves);
+                String slave = slaveOffice.pushOneJob(newJob, toSlaves);
 
                 Message checkAddJob = CheckPointConstructor.constructAddJobMessage(newJob, slave);
                 sendCheckPoint(checkAddJob);
@@ -180,6 +180,7 @@ public class Commander extends Distributer {
         }else if(type.equals(MemberShipConstructor.SECONDARYDEAD)){
             String id = json.getString("id");
             backUps.delSecondary(id);
+            System.out.printf("Secondary %s dead\n", id);
         }else{
             System.out.println("Un-acceptable membership message");
             System.out.println(msg);

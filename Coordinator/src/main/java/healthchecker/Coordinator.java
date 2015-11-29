@@ -33,6 +33,8 @@ public class Coordinator{
                     // send task to primary when receive hearteat from primary
                     gate.sendTask(spies.getPrimary());
                 }
+
+                spies.watchForWhoIsPrimary();
             }catch (InterruptedIOException e){
                 closeConnections();
                 System.out.println("Coordinator terminated. All resources released");

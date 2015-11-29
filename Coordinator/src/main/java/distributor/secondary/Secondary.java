@@ -3,6 +3,7 @@ package distributor.secondary;
 import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
+import message.msgconstructor.CheckPointConstructor;
 import message.msgconstructor.MemberShipConstructor;
 import org.json.JSONObject;
 import services.common.NetServiceFactory;
@@ -12,6 +13,7 @@ import shared.AllSecondaries;
 import shared.AllSlaves;
 import shared.ConnMetrics;
 import distributor.Distributer;
+import shared.Job;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -43,11 +45,11 @@ public class Secondary extends Distributer {
     public void serve() {
 
         try{
-            Message check = checkPointService.recvAckMessage(getCheckPointDock);
-            if(check != null) {
-                System.out.println(check);
-            }
+            checkPointing();
         }catch (IOException e){
+            e.printStackTrace();
+        } catch (WrongMessageTypeException e) {
+            System.out.println(e.toString());
             e.printStackTrace();
         }
 
@@ -90,9 +92,61 @@ public class Secondary extends Distributer {
         }else if(type.equals(MemberShipConstructor.SECONDARYDEAD)){
             String id = json.getString("id");
             backUps.delSecondary(id);
+            System.out.printf("Secondary %s dead\n", id);
         }else{
             System.out.println("Un-acceptable membership message");
             System.out.println(msg);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkPointing() throws IOException, WrongMessageTypeException {
+        Message check = checkPointService.recvAckMessage(getCheckPointDock);
+
+        if(check == null)
+            return true;
+
+        System.out.println(check);
+
+        if(check.getType() != MessageTypes.CHECKPOINT){
+            throw new WrongMessageTypeException(check.getType(), MessageTypes.CHECKPOINT);
+        }
+
+        String content = check.getContent();
+
+        JSONObject json = new JSONObject(content);
+        String type = json.getString("checktype");
+
+        if(type == null){
+            System.out.println("Err: Bad CheckPoint Message");
+            return false;
+        }
+        if(type.equals(CheckPointConstructor.ADD_JOB)){
+            JSONObject jobjson = json.getJSONObject("jobDetail");
+            String id = json.getString("sid");
+
+            Job newJob= new Job(jobjson);
+            slaveOffice.checkAddNewJob(id, newJob);
+        }else if(type.equals(CheckPointConstructor.ADD_SLAVE)){
+            String sid = json.getString("sid");
+            String ip = json.getString("ip");
+            if(sid == null || ip == null){
+                System.out.printf(
+                        "Err: CheckPoint add slave, but missing critical information[id: %s, ip: %s]\n",
+                        sid, ip);
+                return false;
+            }
+            slaveOffice.addSlave(sid, ip);
+
+        }else if(type.equals(CheckPointConstructor.SET_JOB_STATUS)){
+            String sid = json.getString("sid");
+            String jid = json.getString("jobid");
+            String status = json.getString("status");
+
+            slaveOffice.setJobStatus(sid, jid, status);
+        }else{
+            System.out.println("Err: Unknown CheckPoint Type");
             return false;
         }
         return true;

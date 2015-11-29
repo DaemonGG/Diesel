@@ -21,8 +21,7 @@ public class AllSlaves {
      * use ip + port(port for delegate tasks) to identify a slave
      */
     class Slave {
-        String ip;
-        int port;
+        String id;
         NetConfig delegateTaskConn;
 
 
@@ -30,18 +29,19 @@ public class AllSlaves {
         HashMap<String, Job> jobMap = new HashMap<String, Job>();
         int jobsNum = 0;
 
-        public Slave(String ip, int port) throws UnknownHostException {
-            delegateTaskConn = new NetConfig(ip, port);
-            this.ip = ip;
-            this.port = port;
+        public Slave(String id, String ip) throws UnknownHostException {
+            delegateTaskConn = new NetConfig(ip, ConnMetrics.portOfSlaveDelegateTask);
+            this.id = id;
         }
         public NetConfig getNetConfigOfSlave(){
             return delegateTaskConn;
         }
         public String getSlaveIP(){
-            return ip;
+            return delegateTaskConn.getIP();
         }
-
+        public String getId(){
+            return id;
+        }
         /**
          * this slave will send this job to the real slave
          * if sent success, he will truly take this job.
@@ -68,8 +68,10 @@ public class AllSlaves {
             }
 
         }
-        void checkPointAddNewJob(){
-
+        void checkPointAddNewJob(Job job){
+            jobList.add(job);
+            jobMap.put(job.getJobId(), job);
+            jobsNum++;
         }
         void setJobStatus(String jobId, String status){
             Job job = jobMap.get(jobId);
@@ -82,7 +84,7 @@ public class AllSlaves {
 
     }
     HashMap<String, Slave> slaves = new HashMap<String, Slave>();
-    ArrayList<String> slavesAddrList = new ArrayList<String>();
+    ArrayList<String> slavesIdList = new ArrayList<String>();
     int index = 0;
 
     private AllSlaves(){};
@@ -96,15 +98,16 @@ public class AllSlaves {
         return instance;
     }
 
-    public void addSlave(String ip, int port) throws UnknownHostException {
-        Slave newSlave = new Slave(ip, port);
-        slaves.put(ip+port, newSlave);
-        slavesAddrList.add(ip);
+    public void addSlave(String id, String ip) throws UnknownHostException {
+        Slave newSlave = new Slave(id, ip);
+        slaves.put(id, newSlave);
+        slavesIdList.add(id);
     }
 
-    public void delSlave(String ip){
+    public void delSlave(String id){
         //slavesIPList.remove(ip);
-        slaves.remove(ip);
+        slaves.remove(id);
+        slavesIdList.remove(id);
     }
 
     /**
@@ -112,32 +115,41 @@ public class AllSlaves {
      *
      * @param job
      * @param commander
-     * @return the Network infoamtion of this delegated slave.
+     * @return the id of this delegated slave.
      * @throws IOException
      */
-    public NetConfig pushOneJob(Job job, NetServiceProxy commander) throws IOException {
-        String targetKey = slavesAddrList.get(index);
+    public String pushOneJob(Job job, NetServiceProxy commander) throws IOException {
+        String targetKey = slavesIdList.get(index);
         index++;
 
         if(targetKey == null){
             return null;
         }
 
-        if(index >= slavesAddrList.size()) index = 0;
+        if(index >= slavesIdList.size()) index = 0;
 
         Slave slave = slaves.get(targetKey);
 
 
         slave.takeNewJob(job, commander);
 
-        return slave.getNetConfigOfSlave();
+        return slave.getId();
     }
-    public void setJobStatus(String slaveKey, String jobId, String status){
-        Slave slave = slaves.get(slaveKey);
+    public void setJobStatus(String slaveId, String jobId, String status){
+        Slave slave = slaves.get(slaveId);
         if(slave == null){
-            System.out.printf("Try to set a non-exist slave[%s] status\n", slaveKey);
+            System.out.printf("Try to set a non-exist slave[%s] status\n", slaveId);
             return;
         }
         slave.setJobStatus(jobId, status);
+    }
+    public void checkAddNewJob(String slaveId, Job job){
+        if(job == null) return;
+        Slave slave = slaves.get(slaveId);
+        if(slave == null){
+            System.out.printf("Try to checkpoint job, but slave not exist[%s]\n", slaveId);
+            return;
+        }
+        slave.checkPointAddNewJob(job);
     }
 }
