@@ -172,7 +172,7 @@ public class Commander extends Distributer {
                     figuring out ...
                  */
 
-
+                System.out.printf("Register new secondary [id: %s, ip: %s]\n", id, ip);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
                 return false;

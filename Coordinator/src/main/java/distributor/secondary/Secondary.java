@@ -85,6 +85,7 @@ public class Secondary extends Distributer {
             String ip = json.getString("ip");
             try {
                 backUps.addSecondary(id, ip, portOfSecondaryCheckPoint);
+                System.out.printf("Register new secondary [id: %s, ip: %s]\n", id, ip);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
                 return false;
