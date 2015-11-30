@@ -1,6 +1,8 @@
 package distributor;
 
-import error.WrongMessageTypeException;
+import java.io.IOException;
+import java.net.DatagramSocket;
+
 import message.Message;
 import message.msgconstructor.HeartBeatConstructor;
 import services.common.NetServiceFactory;
@@ -10,34 +12,33 @@ import shared.AllSecondaries;
 import shared.AllSlaves;
 import shared.ConnMetrics;
 
-import java.io.IOException;
-import java.net.*;
-import java.util.Enumeration;
-
 /**
  * Created by xingchij on 11/19/15.
  */
 public abstract class Distributer implements ConnMetrics {
 
-    public AllSlaves slaveOffice;
-    public AllSecondaries backUps;
-    public int identity;
+	public AllSlaves slaveOffice;
+	public AllSecondaries backUps;
+	public int identity;
 
-    public String ip;
-    public String id;
+	public String ip;
+	public String id;
 
-    public NetConfig coordinator;
-    private NetServiceProxy heartBeatService = NetServiceFactory.getHeartBeatService();
+	public NetConfig coordinator;
+	private NetServiceProxy heartBeatService = NetServiceFactory
+			.getHeartBeatService();
 
-    public abstract boolean dealWithMemberShipMsg(Message msg) ;
+	public abstract boolean dealWithMemberShipMsg(Message msg);
 
-    public void sendHeartBeat() throws IOException {
-        if(coordinator == null){
-            System.out.println("Err: Coordinator network connection not initialized!");
-            return;
-        }
-        heartBeatService.sendMessage(HeartBeatConstructor.constructHeartBeat(id, ip),
-                new DatagramSocket(), coordinator);
-    }
+	public void sendHeartBeat() throws IOException {
+		if (coordinator == null) {
+			System.out
+					.println("Err: Coordinator network connection not initialized!");
+			return;
+		}
+		heartBeatService.sendMessage(
+				HeartBeatConstructor.constructHeartBeat(id, ip),
+				new DatagramSocket(), coordinator);
+	}
 
 }

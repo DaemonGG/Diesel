@@ -1,39 +1,43 @@
 package services.troop;
 
-import services.io.NetConfig;
-import services.io.NetService;
-import message.Message;
-import services.io.UDPService;
-
 import java.io.IOException;
 import java.net.DatagramSocket;
+
+import message.Message;
+import services.io.NetConfig;
+import services.io.NetService;
+import services.io.UDPService;
 
 /**
  * Created by xingchij on 11/17/15.
  */
 public class CommandService implements NetService {
-    private NetService imp = new UDPService();
-    public boolean sendMessage(Message msg, DatagramSocket serverSocket, NetConfig netConf) throws IOException {
-        if(imp.sendMessage(msg, serverSocket, netConf) == false)
-            return false;
+	private NetService imp = new UDPService();
 
-        serverSocket.setSoTimeout(5000);
+	public boolean sendMessage(Message msg, DatagramSocket serverSocket,
+			NetConfig netConf) throws IOException {
+		if (imp.sendMessage(msg, serverSocket, netConf) == false)
+			return false;
 
-        Message ack = imp.receiveMessage(serverSocket);
+		serverSocket.setSoTimeout(5000);
 
-        if(ack == null){
-            System.out.println("wait for ack after send command. timeout");
-            return false;
-        }
-        serverSocket.close();
-        return true;
-    }
+		Message ack = imp.receiveMessage(serverSocket);
 
-    public Message receiveMessage(DatagramSocket serverSocket) throws IOException {
-        return null;
-    }
+		if (ack == null) {
+			System.out.println("wait for ack after send command. timeout");
+			return false;
+		}
+		serverSocket.close();
+		return true;
+	}
 
-    public Message recvAckMessage(DatagramSocket serverSocket) throws IOException {
-        return imp.recvAckMessage(serverSocket);
-    }
+	public Message receiveMessage(DatagramSocket serverSocket)
+			throws IOException {
+		return null;
+	}
+
+	public Message recvAckMessage(DatagramSocket serverSocket)
+			throws IOException {
+		return imp.recvAckMessage(serverSocket);
+	}
 }
