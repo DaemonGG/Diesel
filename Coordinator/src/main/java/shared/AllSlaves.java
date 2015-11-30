@@ -1,5 +1,9 @@
 package shared;
 
+import error.WrongMessageTypeException;
+import message.Message;
+import message.MessageTypes;
+import org.json.JSONObject;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
 
@@ -8,6 +12,7 @@ import java.net.DatagramSocket;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,6 +21,9 @@ import java.util.List;
  */
 public class AllSlaves {
     public static final long TIMEOUT = 12000;
+
+    public static final int HEALTH_HEALTHY = 2;
+    public static final int HEALTH_DEAD = 3;
     /**
      * a class representing a slave
      * use ip + port(port for delegate tasks) to identify a slave
@@ -23,6 +31,7 @@ public class AllSlaves {
     class Slave {
         String id;
         NetConfig delegateTaskConn;
+        int health_state;
         long lastUpdate;
 
         List<Job> jobList = new ArrayList<Job>();
@@ -32,6 +41,7 @@ public class AllSlaves {
         public Slave(String id, String ip) throws UnknownHostException {
             delegateTaskConn = new NetConfig(ip, ConnMetrics.portOfSlaveDelegateTask);
             this.id = id;
+            this.health_state = HEALTH_HEALTHY;
         }
         public NetConfig getNetConfigOfSlave(){
             return delegateTaskConn;
@@ -155,5 +165,68 @@ public class AllSlaves {
             return;
         }
         slave.checkPointAddNewJob(job);
+    }
+
+    public void checkDead(){
+        Collection<Slave> allMonitors = new ArrayList<Slave>();
+        for(Slave monitor : slaves.values()){
+            allMonitors.add(monitor);
+        }
+
+        for(Slave monitor : allMonitors){
+            if(monitor.isTimeout()){
+                monitor.health_state = HEALTH_DEAD;
+                slaves.remove(monitor.getId());
+                slavesIdList.remove(monitor.getId());
+
+                System.out.printf("Find Slave [id: %s, ip: %s] dead, REMOVED\n",
+                        monitor.getId(), monitor.getSlaveIP());
+            }else{
+
+
+            }
+        }
+    }
+
+    public void watchForHeartBeat(NetServiceProxy heartBeatService, DatagramSocket heartBeatDock)
+            throws IOException, WrongMessageTypeException {
+        Message hbt = heartBeatService.receiveMessage(heartBeatDock);
+        if (hbt == null) return ;
+
+        int who = -1;
+        if(hbt.getType() == MessageTypes.HEARTBEAT){
+
+            String content = hbt.getContent();
+            JSONObject json = new JSONObject(content);
+            String slaveId = json.getString("id");
+
+            Slave theOne = slaves.get(slaveId);
+
+
+            /**
+             * if I can not find the distributor, I will register this new guy
+             * add him as a backup.
+             * if right now, no primary, which means it's now a very starting point
+             * I will automatically change this backup to be primary. and send message
+             * telling him about my decision
+             */
+            if(theOne == null){
+                String ip = json.getString("ip");
+                System.out.printf("Find new slave[id: %s, ip: %s], register it\n",
+                        slaveId, ip);
+                addSlave(slaveId, ip);
+
+            }else{
+                System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
+                        theOne.getId(), theOne.getSlaveIP());
+
+                theOne.lastUpdate = System.currentTimeMillis();
+                theOne.health_state = HEALTH_HEALTHY;
+            }
+
+        }else{
+            throw new WrongMessageTypeException(hbt.getType(), MessageTypes.HEARTBEAT);
+        }
+
     }
 }
