@@ -18,6 +18,7 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 				} else {
 					System.setProperty("url", job.getValue());
 					junit.run(SingleTest.class);
+					//TODO send response back
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
