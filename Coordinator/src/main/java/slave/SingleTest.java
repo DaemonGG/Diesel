@@ -23,7 +23,7 @@ public class SingleTest {
 
 	private static WebDriver driver;
 
-	private static int imgCount = 1;
+	private static int imgCount;
 
 	/**
 	 * Instantiates the {@link #driver} instance by using DesiredCapabilities
@@ -34,6 +34,7 @@ public class SingleTest {
 	@Before
 	public void setUp() throws Exception {
 		System.out.println("Setting up image directory");
+		imgCount = Integer.parseInt(System.getProperty("image_count"));
 		setupDir(IMG_LOC);
 		setupDir(CONFIG_LOC);
 		System.out.println("Configuring Tests");
@@ -62,13 +63,6 @@ public class SingleTest {
 		driver.get(System.getProperty("url"));
 		Thread.sleep(2000);
 		getScreenshot(driver);
-		// System.out.println("Finding Sponsors");
-		// WebElement elem = driver.findElement(By.id("sponsors"));
-		// Actions actions = new Actions(driver);
-		// actions.moveToElement(elem);
-		// actions.perform();
-		// Thread.sleep(4000);
-		// getScreenshot(driver);
 		System.out.println("Completed Tests");
 	}
 

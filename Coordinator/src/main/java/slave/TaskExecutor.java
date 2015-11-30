@@ -17,6 +17,7 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 					Thread.sleep(TIMEOUT);
 				} else {
 					System.setProperty("url", job.getValue());
+					System.setProperty("image_count", "1");
 					junit.run(SingleTest.class);
 					// TODO send response back
 				}
