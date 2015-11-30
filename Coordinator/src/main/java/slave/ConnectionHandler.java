@@ -1,15 +1,15 @@
 package slave;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-
+import error.WrongMessageTypeException;
 import message.Message;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import shared.ConnMetrics;
 import shared.Job;
-import error.WrongMessageTypeException;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.SocketException;
 
 public class ConnectionHandler extends AbstractAppiumExecutionService {
 	private DatagramSocket getTasksDock;

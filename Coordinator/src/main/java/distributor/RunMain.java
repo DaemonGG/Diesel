@@ -1,24 +1,22 @@
 package distributor;
 
+import distributor.commander.Commander;
+import distributor.secondary.Secondary;
+import error.WrongMessageTypeException;
+import message.Message;
+import message.MessageTypes;
+import message.msgconstructor.MemberShipConstructor;
+import org.json.JSONObject;
+import services.common.NetServiceFactory;
+import services.common.NetServiceProxy;
+import shared.ConnMetrics;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.UUID;
-
-import message.Message;
-import message.MessageTypes;
-import message.msgconstructor.MemberShipConstructor;
-
-import org.json.JSONObject;
-
-import services.common.NetServiceFactory;
-import services.common.NetServiceProxy;
-import shared.ConnMetrics;
-import distributor.commander.Commander;
-import distributor.secondary.Secondary;
-import error.WrongMessageTypeException;
 
 /**
  * Created by xingchij on 11/19/15.

@@ -1,10 +1,10 @@
 package healthchecker;
 
+import error.WrongMessageTypeException;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
-
-import error.WrongMessageTypeException;
 
 /**
  * Created by xingchij on 11/20/15.

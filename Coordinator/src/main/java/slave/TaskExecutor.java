@@ -1,7 +1,6 @@
 package slave;
 
 import org.junit.runner.JUnitCore;
-
 import shared.Job;
 
 public class TaskExecutor extends AbstractAppiumExecutionService {

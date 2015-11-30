@@ -2,9 +2,7 @@ package message.msgconstructor;
 
 import message.Message;
 import message.MessageTypes;
-
 import org.json.JSONObject;
-
 import services.io.NetConfig;
 import shared.Job;
 

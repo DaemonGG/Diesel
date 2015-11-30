@@ -1,10 +1,6 @@
 package healthchecker;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.util.concurrent.LinkedBlockingQueue;
-
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import services.common.NetServiceFactory;
@@ -12,7 +8,11 @@ import services.common.NetServiceProxy;
 import services.io.NetConfig;
 import shared.ConnMetrics;
 import shared.Job;
-import error.WrongMessageTypeException;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by xingchij on 11/26/15.

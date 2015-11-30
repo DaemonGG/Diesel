@@ -1,11 +1,11 @@
 package services.common;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-
 import message.Message;
 import services.io.NetConfig;
 import services.io.NetService;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
 
 /**
  * Created by xingchij on 11/17/15.

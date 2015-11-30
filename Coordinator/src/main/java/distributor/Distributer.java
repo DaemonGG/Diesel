@@ -1,8 +1,5 @@
 package distributor;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-
 import message.Message;
 import message.msgconstructor.HeartBeatConstructor;
 import services.common.NetServiceFactory;
@@ -11,6 +8,9 @@ import services.io.NetConfig;
 import shared.AllSecondaries;
 import shared.AllSlaves;
 import shared.ConnMetrics;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
 
 /**
  * Created by xingchij on 11/19/15.

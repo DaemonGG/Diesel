@@ -1,13 +1,11 @@
 package shared;
 
-import java.util.UUID;
-
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
-
 import org.json.JSONObject;
 
-import error.WrongMessageTypeException;
+import java.util.UUID;
 
 /**
  * Created by xingchij on 11/18/15.

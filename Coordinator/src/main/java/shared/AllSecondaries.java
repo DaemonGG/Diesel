@@ -1,12 +1,12 @@
 package shared;
 
+import services.io.NetConfig;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import services.io.NetConfig;
 
 /**
  * Created by xingchij on 11/19/15.

@@ -1,9 +1,9 @@
 package services.io;
 
+import message.Message;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
-
-import message.Message;
 
 /**
  * Created by xingchij on 11/17/15.

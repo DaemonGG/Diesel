@@ -1,5 +1,16 @@
 package healthchecker;
 
+import error.WrongMessageTypeException;
+import message.Message;
+import message.MessageTypes;
+import message.msgconstructor.MemberShipConstructor;
+import message.msgconstructor.WhoIsPrimaryConstructor;
+import org.json.JSONObject;
+import services.common.NetServiceFactory;
+import services.common.NetServiceProxy;
+import services.io.NetConfig;
+import shared.ConnMetrics;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -7,19 +18,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
-import message.Message;
-import message.MessageTypes;
-import message.msgconstructor.MemberShipConstructor;
-import message.msgconstructor.WhoIsPrimaryConstructor;
-
-import org.json.JSONObject;
-
-import services.common.NetServiceFactory;
-import services.common.NetServiceProxy;
-import services.io.NetConfig;
-import shared.ConnMetrics;
-import error.WrongMessageTypeException;
 
 /**
  * Created by xingchij on 11/20/15.

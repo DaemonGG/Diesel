@@ -1,18 +1,14 @@
 package services.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import message.Message;
+import message.MessageTypes;
+
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
-
-import message.Message;
-import message.MessageTypes;
 
 /**
  * Created by xingchij on 11/17/15.

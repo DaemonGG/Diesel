@@ -1,5 +1,12 @@
 package shared;
 
+import error.WrongMessageTypeException;
+import message.Message;
+import message.MessageTypes;
+import org.json.JSONObject;
+import services.common.NetServiceProxy;
+import services.io.NetConfig;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.UnknownHostException;
@@ -7,15 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
-import message.Message;
-import message.MessageTypes;
-
-import org.json.JSONObject;
-
-import services.common.NetServiceProxy;
-import services.io.NetConfig;
-import error.WrongMessageTypeException;
 
 /**
  * Created by xingchij on 11/18/15.

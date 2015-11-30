@@ -1,26 +1,24 @@
 package distributor.commander;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.List;
-
+import distributor.Distributer;
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.CheckPointConstructor;
 import message.msgconstructor.MemberShipConstructor;
-
 import org.json.JSONObject;
-
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
 import shared.AllSecondaries;
 import shared.AllSlaves;
 import shared.Job;
-import distributor.Distributer;
-import error.WrongMessageTypeException;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.List;
 
 /**
  * Created by xingchij on 11/18/15.

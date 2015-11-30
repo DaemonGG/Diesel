@@ -1,14 +1,14 @@
 package services.checkpoint;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.List;
-
 import message.Message;
 import services.io.NetConfig;
 import services.io.NetService;
 import services.io.UDPService;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.List;
 
 /**
  * Created by xingchij on 11/17/15.
