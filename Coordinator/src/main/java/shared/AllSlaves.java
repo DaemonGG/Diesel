@@ -154,6 +154,10 @@ public class AllSlaves {
 	 */
 	public String pushOneJob(Job job, NetServiceProxy commander)
 			throws IOException {
+		if(index >= slavesIdList.size()) {
+			System.out.println("No Slave is working now, unable to serve");
+			return null;
+		}
 		String targetKey = slavesIdList.get(index);
 		index++;
 

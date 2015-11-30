@@ -1,6 +1,8 @@
 package healthchecker;
 
 import error.WrongMessageTypeException;
+import services.io.NetConfig;
+import shared.ConnMetrics;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -31,7 +33,7 @@ public class Coordinator {
 
 				if (identity == WatcherGroup.ID_PRIMARY) {
 					// send task to primary when receive hearteat from primary
-					gate.sendTask(spies.getPrimary());
+					gate.sendTask(new NetConfig(spies.getPrimary().getIP(), ConnMetrics.portReceiveJobs));
 				}
 
 				spies.watchForWhoIsPrimary();
