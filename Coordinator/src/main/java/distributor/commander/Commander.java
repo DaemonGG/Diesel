@@ -112,7 +112,7 @@ public class Commander extends Distributer {
 			String sip = slaveOffice.getSlaveIp(id);
 			if(sip != null) {
 
-				Message addSlaveCheckPointMsg = CheckPointConstructor.constructAddSlaveMessage(id, sip);
+				Message addSlaveCheckPointMsg = CheckPointConstructor.constructAddSlaveMessage(sip, id);
 				sendCheckPoint(addSlaveCheckPointMsg);
 			}
 		} catch (IOException e) {

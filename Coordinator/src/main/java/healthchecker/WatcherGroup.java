@@ -310,8 +310,8 @@ public class WatcherGroup implements ConnMetrics {
 					who = ID_SECONDARY;
 				}
 			} else {
-//				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
-//						theOne.getRepresentedId(), theOne.getConn().getIP());
+				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
+						theOne.getRepresentedId(), theOne.getConn().getIP());
 
 				if (theOne.identity == ID_PRIMARY) {
 					who = ID_PRIMARY;
