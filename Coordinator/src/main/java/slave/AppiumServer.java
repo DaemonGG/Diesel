@@ -45,7 +45,7 @@ public class AppiumServer extends Distributer {
 			System.out.println("Primary Received...starting to serve");
 			this.connectionHandler.registerServer(this);
 			this.taskExecutor.registerServer(this);
-			new Thread(this.connectionHandler).start();;
+			new Thread(this.connectionHandler).start();
 			new Thread(this.taskExecutor).start();
 			while(true) {
 				sendHeartBeat();
