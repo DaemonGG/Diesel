@@ -85,4 +85,8 @@ public class AppiumServer extends Distributer {
 	public boolean dealWithMemberShipMsg(Message msg) {
 		return false;
 	}
+
+	public static void main(String[] args) throws SocketException {
+		new AppiumServer();
+	}
 }
