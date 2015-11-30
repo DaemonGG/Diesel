@@ -42,7 +42,9 @@ public class AppiumServer extends Distributer {
 			getPrimary();
 			this.connectionHandler.run();
 			this.taskExecutor.run();
-		} catch (IOException | WrongMessageTypeException e) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (WrongMessageTypeException e) {
 			e.printStackTrace();
 		}
 	}
