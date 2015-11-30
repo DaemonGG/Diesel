@@ -97,7 +97,7 @@ public class Job implements JobSettings {
 			String content = msg.getContent();
 			JSONObject json = new JSONObject(content);
 			String type = json.getString("type");
-			String value = json.getString("value");
+			String value = json.getString("url");
 			int uid = json.getInt("userId");
 			String username = json.getString("userName");
 
