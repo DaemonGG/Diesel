@@ -42,6 +42,7 @@ public class AllSlaves {
 			delegateTaskConn = new NetConfig(ip,
 					ConnMetrics.portOfSlaveDelegateTask);
 			this.id = id;
+			lastUpdate = System.currentTimeMillis();
 			this.health_state = HEALTH_HEALTHY;
 		}
 

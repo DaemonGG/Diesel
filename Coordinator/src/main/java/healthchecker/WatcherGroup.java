@@ -418,6 +418,7 @@ public class WatcherGroup implements ConnMetrics {
 		}
 		Message answer = WhoIsPrimaryConstructor.constructAnswer(primary
 				.getConn().getIP());
+		System.out.printf("Tell [ip:%s, port:%d] primary address\n",  ip, port);
 		tellAboutPrimaryService.sendMessage(answer, whoIsPrimaryDock,
 				new NetConfig(ip, port));
 	}
