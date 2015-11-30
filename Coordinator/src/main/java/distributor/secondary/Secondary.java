@@ -142,6 +142,7 @@ public class Secondary extends Distributer {
 								sid, ip);
 				return false;
 			}
+			System.out.printf("Get new slave [id: %s, ip:%s]\n", sid, ip);
 			slaveOffice.addSlave(sid, ip);
 
 		} else if (type.equals(CheckPointConstructor.SET_JOB_STATUS)) {
