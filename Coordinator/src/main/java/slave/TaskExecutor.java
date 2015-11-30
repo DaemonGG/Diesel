@@ -13,6 +13,7 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 			try {
 				job = this.server.removeJob();
 				if (job == null) {
+					System.out.println("Executor Sleeping");
 					Thread.sleep(TIMEOUT);
 				} else {
 					System.setProperty("url", job.getValue());

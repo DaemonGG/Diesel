@@ -24,6 +24,7 @@ import error.WrongMessageTypeException;
 
 public class AppiumServer extends Distributer {
 	private static final int QUERY_PORT = 12345;
+	private static final int TIMEOUT = 1000;
 	private Queue<Job> taskQueue;
 	private ConnectionHandler connectionHandler;
 	private TaskExecutor taskExecutor;
@@ -39,12 +40,20 @@ public class AppiumServer extends Distributer {
 	@Override
 	public void serve() {
 		try {
+			System.out.println("Getting Primary");
 			getPrimary();
-			this.connectionHandler.run();
-			this.taskExecutor.run();
+			System.out.println("Primary Received...starting to serve");
+			new Thread(this.connectionHandler).run();
+			new Thread(this.taskExecutor).run();
+			while(true) {
+				sendHeartBeat();
+				Thread.sleep(TIMEOUT);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (WrongMessageTypeException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
