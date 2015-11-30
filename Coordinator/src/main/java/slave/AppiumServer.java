@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import message.Message;
+import services.io.NetConfig;
 import shared.Job;
 import distributor.Distributer;
 
@@ -16,6 +17,7 @@ public class AppiumServer extends Distributer {
 	private TaskExecutor taskExecutor;
 
 	public AppiumServer() throws SocketException {
+		this.ip = NetConfig.getMyIp();
 		this.id = UUID.randomUUID().toString();
 		this.taskQueue = new ConcurrentLinkedQueue<Job>();
 		this.connectionHandler = new ConnectionHandler();
