@@ -87,6 +87,6 @@ public class AppiumServer extends Distributer {
 	}
 
 	public static void main(String[] args) throws SocketException {
-		new AppiumServer();
+		new AppiumServer().serve();
 	}
 }
