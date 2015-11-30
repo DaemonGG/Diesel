@@ -108,7 +108,14 @@ public class Commander extends Distributer {
 		 * receive heart beat from slaves
 		 */
 		try {
-			slaveOffice.watchForHeartBeat(heartBeatService, getHeartBeatDock);
+			String id = slaveOffice.watchForHeartBeat(heartBeatService, getHeartBeatDock);
+			String sip = slaveOffice.getSlaveIp(id);
+			if(sip == null) {
+				System.out.println("Err: Try to checkpoint new slave, slave ip should not be null!");
+				return;
+			}
+			Message addSlaveCheckPointMsg = CheckPointConstructor.constructAddSlaveMessage(id, sip);
+			sendCheckPoint(addSlaveCheckPointMsg);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (WrongMessageTypeException e) {

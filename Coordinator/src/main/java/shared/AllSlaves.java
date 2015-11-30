@@ -19,7 +19,7 @@ import java.util.List;
  * Created by xingchij on 11/18/15.
  */
 public class AllSlaves {
-	public static final long TIMEOUT = 12000;
+	public static final long TIMEOUT = 10000;
 
 	public static final int HEALTH_HEALTHY = 2;
 	public static final int HEALTH_DEAD = 3;
@@ -137,6 +137,12 @@ public class AllSlaves {
 		slavesIdList.remove(id);
 	}
 
+	public String getSlaveIp(String id){
+		Slave s = slaves.get(id);
+		if(s == null) return null;
+
+		return s.getSlaveIP();
+	}
 	/**
 	 * This function will find a slave to delegate the task, in a round robin
 	 * way
@@ -211,12 +217,20 @@ public class AllSlaves {
 		return death;
 	}
 
-	public void watchForHeartBeat(NetServiceProxy heartBeatService,
-			DatagramSocket heartBeatDock) throws IOException,
+	/**
+	 *
+	 * @param heartBeatService
+	 * @param heartBeatDock
+	 * @return The id of a new slave, if it's not  a new slave, return null
+	 * @throws IOException
+	 * @throws WrongMessageTypeException
+     */
+	public String watchForHeartBeat(NetServiceProxy heartBeatService,
+									DatagramSocket heartBeatDock) throws IOException,
 			WrongMessageTypeException {
 		Message hbt = heartBeatService.receiveMessage(heartBeatDock);
 		if (hbt == null)
-			return;
+			return null;
 
 		int who = -1;
 		if (hbt.getType() == MessageTypes.HEARTBEAT) {
@@ -239,7 +253,7 @@ public class AllSlaves {
 						"Find new slave[id: %s, ip: %s], register it\n",
 						slaveId, ip);
 				addSlave(slaveId, ip);
-
+				return slaveId;
 			} else {
 				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
 						theOne.getId(), theOne.getSlaveIP());
@@ -253,5 +267,6 @@ public class AllSlaves {
 					MessageTypes.HEARTBEAT);
 		}
 
+		return null;
 	}
 }

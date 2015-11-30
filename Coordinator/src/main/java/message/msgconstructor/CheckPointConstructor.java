@@ -26,12 +26,12 @@ public class CheckPointConstructor {
 		return new Message(MessageTypes.CHECKPOINT, content);
 	}
 
-	public static Message constructAddSlaveMessage(NetConfig slave, String id) {
-		if (slave == null)
+	public static Message constructAddSlaveMessage(String slaveIp, String id) {
+		if (slaveIp == null)
 			return null;
 
 		JSONObject json = new JSONObject();
-		json.put("ip", slave.getIP());
+		json.put("ip", slaveIp);
 		json.put("sid", id);
 		json.put("checktype", ADD_SLAVE);
 		String content = json.toString();
