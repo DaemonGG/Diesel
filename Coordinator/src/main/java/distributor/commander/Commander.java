@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import message.Message;
 import message.MessageTypes;
@@ -28,12 +29,16 @@ public class Commander extends Distributer {
 
 	DatagramSocket reportDock = null;
 	DatagramSocket getJobDock = null;
+	DatagramSocket getHeartBeatDock = null;
 	NetServiceProxy toSlaves = NetServiceFactory.getCommandService();
 	NetServiceProxy toSendaries = NetServiceFactory.getCheckPointService();
 	NetServiceProxy reportService = NetServiceFactory.getRawUDPService();
+	NetServiceProxy heartBeatService = NetServiceFactory.getHeartBeatService();
 
 	public static final int RECV_JOB_TIMEOUT = 500;
 	public static final int RECV_REPORT_TIMEOUT = 500;
+	public static final int RECV_HEARTBEAT_TIMEOUT = 50;
+
 
 	public Commander(String id) throws SocketException, UnknownHostException {
 
@@ -53,9 +58,11 @@ public class Commander extends Distributer {
 
 		reportDock = new DatagramSocket(portReceiveReport);
 		getJobDock = new DatagramSocket(portReceiveJobs);
+		getHeartBeatDock = new DatagramSocket(portReceiveHeartBeatFromSlave);
 
 		reportDock.setSoTimeout(RECV_REPORT_TIMEOUT);
 		getJobDock.setSoTimeout(RECV_JOB_TIMEOUT);
+		getHeartBeatDock.setSoTimeout(RECV_HEARTBEAT_TIMEOUT);
 	}
 
 	public void serve() {
@@ -98,6 +105,23 @@ public class Commander extends Distributer {
 			System.out.println(e);
 			e.printStackTrace();
 		}
+
+		/**
+		 * receive heart beat from slaves
+		 */
+		try {
+			slaveOffice.watchForHeartBeat(heartBeatService, getHeartBeatDock);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (WrongMessageTypeException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * check for dead slaves
+		 */
+		List<String> deadSlaves = slaveOffice.checkDead();
+
 	}
 
 	public void closeConnections() {

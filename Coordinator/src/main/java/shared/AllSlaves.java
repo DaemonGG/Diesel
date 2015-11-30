@@ -189,18 +189,19 @@ public class AllSlaves {
 		slave.checkPointAddNewJob(job);
 	}
 
-	public void checkDead() {
+	public List<String> checkDead() {
 		Collection<Slave> allMonitors = new ArrayList<Slave>();
 		for (Slave monitor : slaves.values()) {
 			allMonitors.add(monitor);
 		}
+		List<String> death = new ArrayList<String>();
 
 		for (Slave monitor : allMonitors) {
 			if (monitor.isTimeout()) {
 				monitor.health_state = HEALTH_DEAD;
 				slaves.remove(monitor.getId());
 				slavesIdList.remove(monitor.getId());
-
+				death.add(monitor.getId());
 				System.out.printf(
 						"Find Slave [id: %s, ip: %s] dead, REMOVED\n",
 						monitor.getId(), monitor.getSlaveIP());
@@ -208,6 +209,7 @@ public class AllSlaves {
 
 			}
 		}
+		return death;
 	}
 
 	public void watchForHeartBeat(NetServiceProxy heartBeatService,
