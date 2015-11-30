@@ -15,7 +15,7 @@ import java.util.List;
  * Created by xingchij on 11/18/15.
  */
 public class AllSlaves {
-
+    public static final long TIMEOUT = 12000;
     /**
      * a class representing a slave
      * use ip + port(port for delegate tasks) to identify a slave
@@ -23,7 +23,7 @@ public class AllSlaves {
     class Slave {
         String id;
         NetConfig delegateTaskConn;
-
+        long lastUpdate;
 
         List<Job> jobList = new ArrayList<Job>();
         HashMap<String, Job> jobMap = new HashMap<String, Job>();
@@ -42,6 +42,10 @@ public class AllSlaves {
         public String getId(){
             return id;
         }
+        boolean isTimeout(){
+            return (System.currentTimeMillis() - lastUpdate) > TIMEOUT;
+        }
+
         /**
          * this slave will send this job to the real slave
          * if sent success, he will truly take this job.

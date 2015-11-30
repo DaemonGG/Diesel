@@ -16,7 +16,7 @@ import java.util.UUID;
  *  this is a Job represents a test task
  *  Job object and "DELEGATE" Message objects can be equally transformed between each other.
  *  NOTE: the "DELEGATE" Message sent by web client contains no JobId.
- *        JobId is first assigned by Coordinator when received.
+ *        JobId is first assigned by web client.
  *        Master , Slaves will receive "DELEGATE" Message with a unique JobId.
  */
 

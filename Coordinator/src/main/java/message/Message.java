@@ -1,5 +1,6 @@
 package message;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -25,8 +26,12 @@ public class Message implements Serializable{
 
     public String toString(){
         JSONObject json = new JSONObject();
-        json.put("type", type);
-        json.put("content", content);
+        try {
+            json.put("type", type);
+            json.put("content", content);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
         return json.toString();
     }
 }

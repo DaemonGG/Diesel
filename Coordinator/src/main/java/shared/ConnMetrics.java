@@ -16,7 +16,7 @@ public interface ConnMetrics {
     public static final int portForMemberShipConfig = 8006;
     public static final int portOfCoordinatorRecvJobs = 8008;
     public static final int portOfCoordinatorForPrimaryAddr = 8009;
-    public static final String IPOfCoordinator = "192.168.1.2";
+    public static final String IPOfCoordinator = "128.237.184.58";
 
     public void closeConnections();
     public void serve() ;

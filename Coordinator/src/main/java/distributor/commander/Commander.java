@@ -33,6 +33,9 @@ public class Commander extends Distributer {
     NetServiceProxy toSendaries = NetServiceFactory.getCheckPointService();
     NetServiceProxy reportService = NetServiceFactory.getRawUDPService();
 
+    public static final int RECV_JOB_TIMEOUT = 500;
+    public static final int RECV_REPORT_TIMEOUT = 500;
+
     public Commander(String id) throws SocketException, UnknownHostException {
 
         ip = NetConfig.getMyIp();
@@ -51,8 +54,8 @@ public class Commander extends Distributer {
         reportDock = new DatagramSocket(portReceiveReport);
         getJobDock = new DatagramSocket(portReceiveJobs);
 
-        reportDock.setSoTimeout(500);
-        getJobDock.setSoTimeout(500);
+        reportDock.setSoTimeout(RECV_REPORT_TIMEOUT);
+        getJobDock.setSoTimeout(RECV_JOB_TIMEOUT);
     }
 
     public void serve() {
