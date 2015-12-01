@@ -162,6 +162,9 @@ public class Secondary extends Distributer {
 			JSONArray slaves = json.getJSONArray("slaves");
 			backUps.construct(secondaries);
 			slaveOffice.construct(slaves);
+
+			System.out.println("==============SNAPSHOT=============");
+			System.out.println(this);
 		} else{
 			System.out.println("Err: Unknown CheckPoint Type");
 			return false;

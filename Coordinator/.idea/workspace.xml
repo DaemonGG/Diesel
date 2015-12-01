@@ -23,11 +23,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Commander.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Commander.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7206704">
-              <caret line="212" column="36" selection-start-line="212" selection-start-column="36" selection-end-line="212" selection-end-column="36" />
+            <state vertical-scroll-proportion="-18.222221">
+              <caret line="226" column="5" selection-start-line="226" selection-start-column="5" selection-end-line="226" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -88,8 +88,8 @@
       <file leaf-file-name="Distributer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/distributor/Distributer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+            <state vertical-scroll-proportion="-17.11111">
+              <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -115,11 +115,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Secondary.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Secondary.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-32.11111">
-              <caret line="163" column="42" selection-start-line="163" selection-start-column="42" selection-end-line="163" selection-end-column="42" />
+            <state vertical-scroll-proportion="0.8044693">
+              <caret line="167" column="0" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -174,7 +174,6 @@
         <option value="$PROJECT_DIR$/src/main/java/services/troop/CommandService.java" />
         <option value="$PROJECT_DIR$/src/main/java/services/io/NetConfig.java" />
         <option value="$PROJECT_DIR$/src/main/java/services/io/UDPService.java" />
-        <option value="$PROJECT_DIR$/src/main/java/distributor/Distributer.java" />
         <option value="$PROJECT_DIR$/src/main/java/services/heartbeat/MemberShipService.java" />
         <option value="$PROJECT_DIR$/src/main/java/healthchecker/TaskReceiver.java" />
         <option value="$PROJECT_DIR$/src/main/java/message/MessageTypes.java" />
@@ -192,8 +191,9 @@
         <option value="$PROJECT_DIR$/src/main/java/message/msgconstructor/CheckPointConstructor.java" />
         <option value="$PROJECT_DIR$/src/main/java/shared/AllSecondaries.java" />
         <option value="$PROJECT_DIR$/src/main/java/shared/AllSlaves.java" />
-        <option value="$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java" />
         <option value="$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java" />
+        <option value="$PROJECT_DIR$/src/main/java/distributor/Distributer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java" />
       </list>
     </option>
   </component>
@@ -1407,14 +1407,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/Distributer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/distributor/RunMain.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-12.777778">
@@ -1457,18 +1449,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-32.11111">
-          <caret line="163" column="42" selection-start-line="163" selection-start-column="42" selection-end-line="163" selection-end-column="42" />
+        <state vertical-scroll-proportion="-18.222221">
+          <caret line="226" column="5" selection-start-line="226" selection-start-column="5" selection-end-line="226" selection-end-column="5" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/Distributer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7206704">
-          <caret line="212" column="36" selection-start-line="212" selection-start-column="36" selection-end-line="212" selection-end-column="36" />
+        <state vertical-scroll-proportion="-17.11111">
+          <caret line="51" column="33" selection-start-line="51" selection-start-column="33" selection-end-line="51" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8044693">
+          <caret line="167" column="0" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
           <folding />
         </state>
       </provider>
