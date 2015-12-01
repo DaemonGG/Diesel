@@ -81,6 +81,7 @@ public class AppiumServer extends Distributer {
 	}
 
 	public void closeConnections() {
+		this.taskExecutor.close();
 		this.connectionHandler.close();
 	}
 
