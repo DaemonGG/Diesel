@@ -158,7 +158,7 @@ public class Secondary extends Distributer {
 			String sid = json.getString("sid");
 			slaveOffice.delSlave(sid);
 			System.out.printf("Slave id: %s  dead\n", sid);
-			
+
 		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){
 			JSONArray secondaries = json.getJSONArray("secondaries");
 			JSONArray slaves = json.getJSONArray("slaves");
