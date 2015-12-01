@@ -39,6 +39,7 @@ public class AllSecondaries {
 	}
 
 	public void delSecondary(String id) {
+		if(!secondariesMap.containsKey(id)) return;
 		secondariesMap.remove(id);
 		num--;
 	}
