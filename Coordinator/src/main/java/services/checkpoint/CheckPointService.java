@@ -40,13 +40,13 @@ public class CheckPointService implements NetService {
 				Message ack = imp.receiveMessage(serverSocket);
 
 				if (ack == null) {
-					System.out.printf("Send checkpoint to %s fail\n",
-							addr.getHostAddress() + port);
+					System.out.printf("Send checkpoint to [ip: %s] fail\n",
+							addr.getHostAddress() );
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.out.printf("Send checkpoint to %s fail\n",
-						addr.getHostAddress() + port);
+				System.out.printf("Send checkpoint to [ip: %s] fail\n",
+						addr.getHostAddress() );
 			}
 		}
 		serverSocket.close();
