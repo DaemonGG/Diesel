@@ -212,7 +212,8 @@ public class Commander extends Distributer {
 
 			slaveOffice.setJobStatus(slaveId, jid, status);
 			// send checkpoint
-
+			Message checkReport = CheckPointConstructor.constructSetJobStatusMessage(slaveId, jid, status);
+			sendCheckPoint(checkReport);
 			System.out.println(report);
 		}
 

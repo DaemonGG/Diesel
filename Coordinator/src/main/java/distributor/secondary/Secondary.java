@@ -158,7 +158,7 @@ public class Secondary extends Distributer {
 			slaveOffice.setJobStatus(sid, jid, status);
 		} else if(type.equals(CheckPointConstructor.DEAD_SLAVE)){
 			String sid = json.getString("sid");
-			slaveOffice.delSlave(sid);
+			slaveOffice.delSlave(sid, unfinishedQueue);
 			System.out.printf("Slave id: %s  dead\n", sid);
 
 		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){

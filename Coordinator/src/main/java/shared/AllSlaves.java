@@ -148,8 +148,17 @@ public class AllSlaves {
 		slavesIdList.add(id);
 	}
 
-	public void delSlave(String id) {
-		// slavesIPList.remove(ip);
+	public void delSlave(String id, Queue<Job> unfinishedQueue) {
+		// dump unfinished jobs out from this dead slave
+
+		Slave monitor = slaves.get(id);
+		if(monitor == null) return;
+		for(Job j : monitor.jobList){
+			if(!j.getStatus().equals(JobSettings.JOB_SUCCESS)){
+				unfinishedQueue.add(j);
+			}
+		}
+
 		slaves.remove(id);
 		slavesIdList.remove(id);
 	}
