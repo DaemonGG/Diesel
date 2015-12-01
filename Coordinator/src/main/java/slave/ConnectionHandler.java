@@ -29,6 +29,7 @@ public class ConnectionHandler extends AbstractAppiumExecutionService {
 			try {
 				msg = this.commandService.recvAckMessage(this.getTasksDock);
 				if (msg != null) {
+					System.out.println(msg);
 					this.server.addJob(Job.getJobFromDelegateMsg(msg));
 				} else {
 					System.out.println("Handler Sleeping");

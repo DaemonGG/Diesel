@@ -41,4 +41,15 @@ public abstract class Distributer implements ConnMetrics {
 				new DatagramSocket(), coordinator);
 	}
 
+	public String toString(){
+		if(ip == null || id == null || slaveOffice == null || backUps == null)
+			return null;
+
+		StringBuilder output = new StringBuilder();
+		output.append(String.format("id: %s\tip: %s\n", id, ip));
+		output.append(String.format("Slaves: %s\n", slaveOffice.dump().toString()));
+		output.append(String.format("Secondaries: %s\n", backUps.dump().toString()));
+		return output.toString();
+	}
+
 }

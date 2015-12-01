@@ -45,6 +45,7 @@ public class Commander extends Distributer {
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
 
 		slaveOffice = AllSlaves.getOffice();
+		slaveOffice.refreshAll();
 		backUps = AllSecondaries.getInstance();
 		// test only
 		// try {
@@ -112,7 +113,7 @@ public class Commander extends Distributer {
 			String sip = slaveOffice.getSlaveIp(id);
 			if(sip != null) {
 
-				Message addSlaveCheckPointMsg = CheckPointConstructor.constructAddSlaveMessage(id, sip);
+				Message addSlaveCheckPointMsg = CheckPointConstructor.constructAddSlaveMessage(sip, id);
 				sendCheckPoint(addSlaveCheckPointMsg);
 			}
 		} catch (IOException e) {
@@ -125,7 +126,10 @@ public class Commander extends Distributer {
 		 * check for dead slaves
 		 */
 		List<String> deadSlaves = slaveOffice.checkDead();
-
+		for(String id: deadSlaves){
+			Message checkDead = CheckPointConstructor.constructDelSlaveMessage(id);
+			sendCheckPoint(checkDead);
+		}
 	}
 
 	public void closeConnections() {
@@ -202,7 +206,8 @@ public class Commander extends Distributer {
 				 * primary need to find a way to transfer whole state to this
 				 * new secondary figuring out ...
 				 */
-
+				Message snapShot = CheckPointConstructor.constructSnapShotMessage(this);
+				sendCheckPoint(snapShot);
 				System.out.printf("Register new secondary [id: %s, ip: %s]\n",
 						id, ip);
 			} catch (UnknownHostException e) {

@@ -84,6 +84,9 @@ public class RunMain {
 			if (identity == ID_SECONDARY) {
 				System.out.println("I am becoming a primary");
 				switchIdentiry(ID_PRIMARY);
+
+				System.out.println("==============SNAPSHOT=============");
+				System.out.println(player);
 			}
 			return true;
 		} else {

@@ -18,6 +18,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by xingchij on 11/20/15.
@@ -75,11 +76,12 @@ public class WatcherGroup implements ConnMetrics {
 	public static final int RECV_WHOISPRIMARY_TIMEOUT = 20;
 
 	public int watcherNum = 0;
-	Watcher nextPrimary = null;
+	int nextPrimaryIndex = 0;
 	Watcher primary = null;
 
 	HashMap<String, Watcher> group = new HashMap<String, Watcher>();
 	HashMap<String, Watcher> backUpGroup = new HashMap<String, Watcher>();
+	List<String> secondaryIdList = new ArrayList<String>();
 
 	DatagramSocket heartBeatDock;
 	DatagramSocket whoIsPrimaryDock;
@@ -122,18 +124,31 @@ public class WatcherGroup implements ConnMetrics {
 			System.out.println("Announce to add new secondary totally fail");
 			return;
 		}
-		/*
-		 * set the first participating backup to be the next primary
-		 */
-		if (nextPrimary == null) {
-			nextPrimary = b;
-		}
+
 
 		group.put(b.getRepresentedId(), b);
 		backUpGroup.put(b.getRepresentedId(), b);
+		secondaryIdList.add(id);
 		watcherNum++;
 	}
 
+	public void delWatcher(String id){
+		if(!group.containsKey(id)){
+			System.out.printf("Try to remove watcher: %s, but not exist\n", id);
+			return;
+		}
+		watcherNum --;
+		if(primary != null && id.equals(primary.getRepresentedId())){
+			group.remove(primary.getRepresentedId());
+			primary = null;
+		}else{
+			if (backUpGroup.containsKey(id)) {
+				backUpGroup.remove(id);
+				secondaryIdList.remove(id);
+			}
+			group.remove(id);
+		}
+	}
 	private boolean announceNewSecondary(Watcher newOne) {
 		Message newSecondaryMsg = MemberShipConstructor
 				.newSecondaryMemberMsgConstructor(newOne.getRepresentedId(),
@@ -177,34 +192,60 @@ public class WatcherGroup implements ConnMetrics {
 	 * @return
 	 */
 	private boolean changePrimary() {
-		if (nextPrimary == null) {
+		if (secondaryIdList.size() == 0) {
 			System.out.println("No backup remaining...system crash..");
 			return false;
 		}
 		try {
 			Message assignPrimary = MemberShipConstructor
 					.youArePrimaryMsgConstructor();
-			System.out.printf("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
-					nextPrimary.getRepresentedId(), nextPrimary.getConn()
-							.getIP());
-			boolean success = membershipService.sendMessage(assignPrimary,
-					new DatagramSocket(), nextPrimary.getConn());
+
+			boolean success = false;
+			int loopCount = 0;
+			Watcher nextPrimary = null;
+
+			while(success == false && loopCount < secondaryIdList.size()) {
+				String nextId = secondaryIdList.get(nextPrimaryIndex);
+				nextPrimaryIndex++;
+				if(nextPrimaryIndex >= secondaryIdList.size()){
+					nextPrimaryIndex = 0;
+				}
+
+				nextPrimary = backUpGroup.get(nextId);
+
+				System.out.printf("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
+						nextPrimary.getRepresentedId(), nextPrimary.getConn()
+								.getIP());
+				success = membershipService.sendMessage(assignPrimary,
+						new DatagramSocket(), nextPrimary.getConn());
+
+				if (success == false) {
+					System.out.printf("Assign new Primary to [id: %s, ip: %s] fail\n",
+							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
+					nextPrimary = null;
+				}
+				loopCount ++;
+			}
 
 			// the old primary is dead, remove it from list
 			if (primary != null
 					&& group.containsKey(primary.getRepresentedId())) {
-				group.remove(primary.getRepresentedId());
+				delWatcher(primary.getRepresentedId());  // primary will be null
 			}
-
+			if(nextPrimary == null) {
+				System.out.println("No secondary can take the place!");
+				return false;
+			}
 			primary = nextPrimary;
 			primary.changeIdentity(ID_PRIMARY);
 			backUpGroup.remove(nextPrimary.getRepresentedId());
+			secondaryIdList.remove(nextPrimary.getRepresentedId());
 
 			if (backUpGroup.isEmpty()) {
 				System.out.println("NO Secondary remaining...");
-				nextPrimary = null;
-			} else {
-				setNextPrimary();
+			}
+			if(nextPrimaryIndex >= secondaryIdList.size()){
+				nextPrimaryIndex = 0;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -213,13 +254,17 @@ public class WatcherGroup implements ConnMetrics {
 		return true;
 	}
 
-	private void setNextPrimary() {
-		nextPrimary = null;
-		for (Watcher w : backUpGroup.values()) {
-			nextPrimary = w;
-			break;
-		}
-	}
+//	private void setNextPrimary() {
+//		Watcher currentNext = nextPrimary;
+//		nextPrimary = null;
+//		for (Watcher w : backUpGroup.values()) {
+//			if( currentNext == null ||
+//					!currentNext.getRepresentedId().equals(w.getRepresentedId())){
+//				nextPrimary = w;
+//				break;
+//			}
+//		}
+//	}
 
 	/**
 	 * Tell all primary, secondaries, that some secondary is now dead
@@ -310,8 +355,8 @@ public class WatcherGroup implements ConnMetrics {
 					who = ID_SECONDARY;
 				}
 			} else {
-//				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
-//						theOne.getRepresentedId(), theOne.getConn().getIP());
+				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
+						theOne.getRepresentedId(), theOne.getConn().getIP());
 
 				if (theOne.identity == ID_PRIMARY) {
 					who = ID_PRIMARY;
@@ -341,10 +386,10 @@ public class WatcherGroup implements ConnMetrics {
 
 		for (Watcher monitor : allMonitors) {
 			if (monitor.isTimeout()) {
-				watcherNum--;
 				monitor.health_state = HEALTH_DEAD;
 
 				if (monitor.whatIRepresent() == ID_PRIMARY) {
+					watcherNum --;
 					System.out.println("Find primary dead, choose a new one..");
 					if (changePrimary() == false) {
 						System.out
@@ -366,16 +411,7 @@ public class WatcherGroup implements ConnMetrics {
 
 					// if the dead secondary is the next primary, select another
 					// "nextPrimary"
-					if (id.equals(nextPrimary.getRepresentedId())) {
-						setNextPrimary();
-					}
-					// remove this secondary from list
-					if (backUpGroup.containsKey(id)) {
-						backUpGroup.remove(id);
-					}
-					if (group.containsKey(id)) {
-						group.remove(id);
-					}
+					delWatcher(id);
 
 					if (announceSecondaryDead(monitor) == false) {
 						System.out.println("\tUnable to fix");
