@@ -3,6 +3,7 @@ package shared;
 import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class Job implements JobSettings {
 		this.value = value;
 		userId = uid;
 		this.username = username;
-		jobId = UUID.randomUUID().toString();
+		this.jobId = jobId;
 		status = JOB_WAITING;
 		this.jobId = jobId;
 	}
@@ -105,10 +106,15 @@ public class Job implements JobSettings {
 			String value = json.getString("url");
 			int uid = json.getInt("userId");
 			String username = json.getString("userName");
+			String jid = null;
 
-			String jid = json.getString("jobid");
+			try {
+				jid = json.getString("jobid");
+			}catch (JSONException e){
+				e.printStackTrace();
+			}
 
-			if (jid == null) {
+			if (jid != null) {
 				return new Job(jid, type, value, uid, username);
 			} else {
 				return new Job(type, value, uid, username);

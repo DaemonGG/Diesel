@@ -178,6 +178,15 @@ public class Commander extends Distributer {
 			throw new WrongMessageTypeException(report.getType(),
 					MessageTypes.REPORT);
 		} else {
+			String content = report.getContent();
+			JSONObject json = new JSONObject(content);
+			String slaveId = json.getString("sid");
+			String jid = json.getString("jid");
+			String status = json.getString("status");
+
+			slaveOffice.setJobStatus(slaveId, jid, status);
+			// send checkpoint
+
 			System.out.println(report);
 		}
 
