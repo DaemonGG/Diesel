@@ -118,4 +118,10 @@ public class Job implements JobSettings {
 					MessageTypes.DELEGATE);
 		}
 	}
+
+	public static boolean isValidJobStatus(String status){
+		if(status.equals(JOB_FAIL) || status.equals(JOB_SUCCESS) || status.equals(JOB_WAITING))
+			return true;
+		return false;
+	}
 }
