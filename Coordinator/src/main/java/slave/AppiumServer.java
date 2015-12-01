@@ -34,7 +34,7 @@ public class AppiumServer extends Distributer {
 		this.id = UUID.randomUUID().toString();
 		this.taskQueue = new ConcurrentLinkedQueue<Job>();
 		this.connectionHandler = new ConnectionHandler();
-		this.taskExecutor = new TaskExecutor();
+		this.taskExecutor = new TaskExecutor(this.id, this.ip);
 	}
 
 	@Override
