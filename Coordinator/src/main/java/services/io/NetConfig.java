@@ -48,7 +48,7 @@ public class NetConfig {
 
 	public static String getMyIp() throws SocketException {
 		String myip = null;
-		NetworkInterface ni = NetworkInterface.getByName("en0");
+		NetworkInterface ni = NetworkInterface.getByName("wlan0");
 		Enumeration inetAddress = ni.getInetAddresses();
 
 		if (!inetAddress.hasMoreElements()) {

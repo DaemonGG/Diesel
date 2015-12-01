@@ -1,20 +1,17 @@
 package slave;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.DatagramSocket;
-
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.ReportConstructor;
 import message.msgconstructor.WhoIsPrimaryConstructor;
-
 import org.bson.Document;
 import org.bson.types.Binary;
 import org.json.JSONObject;
 import org.junit.runner.JUnitCore;
-
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
@@ -24,11 +21,10 @@ import shared.ConnMetrics;
 import shared.Job;
 import shared.JobSettings;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
-import error.WrongMessageTypeException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.DatagramSocket;
 
 public class TaskExecutor extends AbstractAppiumExecutionService {
 	private static final int QUERY_PORT = 12354;

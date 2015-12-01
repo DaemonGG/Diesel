@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 /**
  * Created by xingchij on 11/19/15.
@@ -34,6 +35,7 @@ public class Secondary extends Distributer {
 		ip = NetConfig.getMyIp();
 		this.id = id;
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
+		unfinishedQueue = new LinkedList<Job>();
 
 		slaveOffice = AllSlaves.getOffice();
 		slaveOffice.refreshAll();
@@ -162,9 +164,14 @@ public class Secondary extends Distributer {
 		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){
 			JSONArray secondaries = json.getJSONArray("secondaries");
 			JSONArray slaves = json.getJSONArray("slaves");
+			JSONArray unfinished = json.getJSONArray("unfinished");
+
 			backUps.construct(secondaries);
 			slaveOffice.construct(slaves);
 			backUps.delSecondary(id);
+
+			construct(unfinished);
+
 			System.out.println("==============SNAPSHOT=============");
 			System.out.println(this);
 		} else{
@@ -172,5 +179,13 @@ public class Secondary extends Distributer {
 			return false;
 		}
 		return true;
+	}
+	private void construct(JSONArray unfarray){
+		unfinishedQueue.clear();
+		for(int i=0; i<unfarray.length(); i++){
+			JSONObject jobjson = unfarray.getJSONObject(i);
+			Job unf = new Job(jobjson);
+			unfinishedQueue.offer(unf);
+		}
 	}
 }

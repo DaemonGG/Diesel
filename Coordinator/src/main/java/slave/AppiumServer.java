@@ -1,5 +1,17 @@
 package slave;
 
+import distributor.Distributer;
+import error.WrongMessageTypeException;
+import message.Message;
+import message.MessageTypes;
+import message.msgconstructor.WhoIsPrimaryConstructor;
+import org.json.JSONObject;
+import services.common.NetServiceFactory;
+import services.common.NetServiceProxy;
+import services.io.NetConfig;
+import shared.ConnMetrics;
+import shared.Job;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -7,20 +19,6 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import message.Message;
-import message.MessageTypes;
-import message.msgconstructor.WhoIsPrimaryConstructor;
-
-import org.json.JSONObject;
-
-import services.common.NetServiceFactory;
-import services.common.NetServiceProxy;
-import services.io.NetConfig;
-import shared.ConnMetrics;
-import shared.Job;
-import distributor.Distributer;
-import error.WrongMessageTypeException;
 
 public class AppiumServer extends Distributer {
 	private static final int QUERY_PORT = 12345;

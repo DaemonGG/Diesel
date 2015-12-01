@@ -5,7 +5,6 @@ import message.Message;
 import message.MessageTypes;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import services.io.NetConfig;
 import shared.Job;
 
 /**
@@ -75,6 +74,7 @@ public class CheckPointConstructor {
 
 		json.put("secondaries", secondaries);
 		json.put("slaves", slaves);
+		json.put("unfinished", server.dumpQueue());
 		json.put("checktype", SNAPSHOT);
 
 		return new Message(MessageTypes.CHECKPOINT, json.toString());
