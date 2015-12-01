@@ -3,6 +3,7 @@ package shared;
 import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
@@ -42,6 +43,11 @@ public class AllSlaves {
 			delegateTaskConn = new NetConfig(ip,
 					ConnMetrics.portOfSlaveDelegateTask);
 			this.id = id;
+			lastUpdate = System.currentTimeMillis();
+			this.health_state = HEALTH_HEALTHY;
+		}
+
+		public void refresh(){
 			lastUpdate = System.currentTimeMillis();
 			this.health_state = HEALTH_HEALTHY;
 		}
@@ -105,7 +111,18 @@ public class AllSlaves {
 			}
 			job.setStatus(status);
 		}
+		JSONObject dump(){
+			JSONObject json = new JSONObject();
+			json.put("sid", id);
+			json.put("ip", getSlaveIP());
 
+			JSONArray jobarray = new JSONArray();
+			for(Job job: jobMap.values()){
+				jobarray.put(job.getJobInJson());
+			}
+			json.put("jobs", jobarray);
+			return json;
+		}
 	}
 
 	HashMap<String, Slave> slaves = new HashMap<String, Slave>();
@@ -121,10 +138,13 @@ public class AllSlaves {
 		if (instance == null) {
 			instance = new AllSlaves();
 		}
-
 		return instance;
 	}
-
+	public void refreshAll(){
+		for(Slave s: slaves.values()){
+			s.refresh();
+		}
+	}
 	public void addSlave(String id, String ip) throws UnknownHostException {
 		Slave newSlave = new Slave(id, ip);
 		slaves.put(id, newSlave);
@@ -272,5 +292,35 @@ public class AllSlaves {
 		}
 
 		return null;
+	}
+	public JSONArray dump(){
+		JSONArray slaveArray = new JSONArray();
+		for(Slave s: slaves.values()){
+			slaveArray.put(s.dump());
+		}
+		return slaveArray;
+	}
+
+	public void construct(JSONArray sarray){
+		slaves.clear();
+		slavesIdList.clear();
+
+		for(int i=0; i<sarray.length(); i++){
+			try {
+				JSONObject slave = sarray.getJSONObject(i);
+				String sid = slave.getString("sid");
+				String ip = slave.getString("ip");
+				addSlave(sid, ip);
+				Slave s = slaves.get(sid);
+
+				JSONArray jobarray = slave.getJSONArray("jobs");
+				for(int j=0; j<jobarray.length(); j++){
+					JSONObject job = jobarray.getJSONObject(j);
+					s.checkPointAddNewJob(new Job(job));
+				}
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

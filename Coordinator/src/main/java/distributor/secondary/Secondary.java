@@ -6,6 +6,7 @@ import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.CheckPointConstructor;
 import message.msgconstructor.MemberShipConstructor;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
@@ -35,6 +36,8 @@ public class Secondary extends Distributer {
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
 
 		slaveOffice = AllSlaves.getOffice();
+		slaveOffice.refreshAll();
+
 		backUps = AllSecondaries.getInstance();
 
 		getCheckPointDock = new DatagramSocket(
@@ -154,6 +157,11 @@ public class Secondary extends Distributer {
 		} else if(type.equals(CheckPointConstructor.DEAD_SLAVE)){
 			String sid = json.getString("sid");
 			slaveOffice.delSlave(sid);
+		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){
+			JSONArray secondaries = json.getJSONArray("secondaries");
+			JSONArray slaves = json.getJSONArray("slaves");
+			backUps.construct(secondaries);
+			slaveOffice.construct(slaves);
 		} else{
 			System.out.println("Err: Unknown CheckPoint Type");
 			return false;

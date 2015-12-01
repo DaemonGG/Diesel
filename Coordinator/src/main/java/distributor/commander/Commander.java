@@ -45,6 +45,7 @@ public class Commander extends Distributer {
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
 
 		slaveOffice = AllSlaves.getOffice();
+		slaveOffice.refreshAll();
 		backUps = AllSecondaries.getInstance();
 		// test only
 		// try {
@@ -205,7 +206,8 @@ public class Commander extends Distributer {
 				 * primary need to find a way to transfer whole state to this
 				 * new secondary figuring out ...
 				 */
-
+				Message snapShot = CheckPointConstructor.constructSnapShotMessage(this);
+				sendCheckPoint(snapShot);
 				System.out.printf("Register new secondary [id: %s, ip: %s]\n",
 						id, ip);
 			} catch (UnknownHostException e) {

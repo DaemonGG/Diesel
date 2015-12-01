@@ -53,6 +53,7 @@ public class Job implements JobSettings {
 
 		this.userId = jobjson.getInt("userId");
 		this.username = jobjson.getString("userName");
+		this.status = jobjson.getString("status");
 	}
 
 	public String getJobId() {
@@ -74,6 +75,7 @@ public class Job implements JobSettings {
 		json.put("url", value);
 		json.put("userId", userId);
 		json.put("userName", username);
+		json.put("status", status);
 
 		Message command = new Message(MessageTypes.DELEGATE, json.toString());
 		return command;
@@ -86,6 +88,8 @@ public class Job implements JobSettings {
 		json.put("url", value);
 		json.put("userId", userId);
 		json.put("userName", username);
+		json.put("status", status);
+
 		return json;
 	}
 

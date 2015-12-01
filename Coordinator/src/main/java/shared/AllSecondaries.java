@@ -1,5 +1,7 @@
 package shared;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import services.io.NetConfig;
 
 import java.net.InetAddress;
@@ -48,5 +50,33 @@ public class AllSecondaries {
 		}
 		NetConfig brdCastNetConfig = new NetConfig(addresses, checkPort);
 		return brdCastNetConfig;
+	}
+
+	public JSONArray dump(){
+		JSONArray secondaryArray = new JSONArray();
+		for(String id: secondariesMap.keySet()){
+			JSONObject secondary = new JSONObject();
+			secondary.put("secondaryId", id);
+			NetConfig conn = secondariesMap.get(id);
+			secondary.put("ip",conn.getIP());
+			secondary.put("port", conn.getPort());
+			secondaryArray.put(secondary);
+		}
+		return secondaryArray;
+	}
+	public void construct(JSONArray jarray){
+		secondariesMap.clear();
+
+		for(int i=0; i<jarray.length(); i++){
+			try {
+				JSONObject secjson = jarray.getJSONObject(i);
+				String id = secjson.getString("secondaryId");
+				String ip = secjson.getString("ip");
+				int port = secjson.getInt("port");
+				addSecondary(id, ip, port);
+			}catch (UnknownHostException e){
+				e.printStackTrace();
+			}
+		}
 	}
 }
