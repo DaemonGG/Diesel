@@ -151,7 +151,10 @@ public class Secondary extends Distributer {
 			String status = json.getString("status");
 
 			slaveOffice.setJobStatus(sid, jid, status);
-		} else {
+		} else if(type.equals(CheckPointConstructor.DEAD_SLAVE)){
+			String sid = json.getString("sid");
+			slaveOffice.delSlave(sid);
+		} else{
 			System.out.println("Err: Unknown CheckPoint Type");
 			return false;
 		}

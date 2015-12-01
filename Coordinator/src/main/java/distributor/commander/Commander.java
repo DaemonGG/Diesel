@@ -125,7 +125,10 @@ public class Commander extends Distributer {
 		 * check for dead slaves
 		 */
 		List<String> deadSlaves = slaveOffice.checkDead();
-
+		for(String id: deadSlaves){
+			Message checkDead = CheckPointConstructor.constructDelSlaveMessage(id);
+			sendCheckPoint(checkDead);
+		}
 	}
 
 	public void closeConnections() {
