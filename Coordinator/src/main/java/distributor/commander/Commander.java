@@ -12,13 +12,16 @@ import services.common.NetServiceProxy;
 import services.io.NetConfig;
 import shared.AllSecondaries;
 import shared.AllSlaves;
+import shared.CurrentTime;
 import shared.Job;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Created by xingchij on 11/18/15.
@@ -32,6 +35,7 @@ public class Commander extends Distributer {
 	NetServiceProxy toSendaries = NetServiceFactory.getCheckPointService();
 	NetServiceProxy reportService = NetServiceFactory.getRawUDPService();
 	NetServiceProxy heartBeatService = NetServiceFactory.getHeartBeatService();
+	NetServiceProxy sendBacktoCoordinatorService = NetServiceFactory.getCommandService();
 
 	public static final int RECV_JOB_TIMEOUT = 500;
 	public static final int RECV_REPORT_TIMEOUT = 500;
@@ -43,6 +47,7 @@ public class Commander extends Distributer {
 		ip = NetConfig.getMyIp();
 		this.id = id;
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
+		unfinishedQueue = new LinkedList<Job>();
 
 		slaveOffice = AllSlaves.getOffice();
 		slaveOffice.refreshAll();
@@ -67,10 +72,6 @@ public class Commander extends Distributer {
 	public void serve() {
 
 		/**
-		 * send heart beat to Membership Coordinator
-		 */
-
-		/**
 		 * receive test tasks from coordinator and delegate task to slaves
 		 */
 		try {
@@ -79,10 +80,16 @@ public class Commander extends Distributer {
 			// Job newJob = new Job("scroll", "www.baidu.com", 0, "jin");
 			if (newJob != null) {
 				String slave = slaveOffice.pushOneJob(newJob, toSlaves);
-
-				Message checkAddJob = CheckPointConstructor
-						.constructAddJobMessage(newJob, slave);
-				sendCheckPoint(checkAddJob);
+				if(slave != null) {
+					Message checkAddJob = CheckPointConstructor
+							.constructAddJobMessage(newJob, slave);
+					sendCheckPoint(checkAddJob);
+				}else{
+					CurrentTime.tprintln(String.format(
+							"DETECTED: Delegate JOB[id: %s] to Slave fail",
+							newJob.getJobId()));
+					unfinishedQueue.add(newJob);
+				}
 			}
 
 		} catch (IOException e) {
@@ -125,10 +132,31 @@ public class Commander extends Distributer {
 		/**
 		 * check for dead slaves
 		 */
-		List<String> deadSlaves = slaveOffice.checkDead();
+		List<String> deadSlaves = slaveOffice.checkDead(unfinishedQueue);
 		for(String id: deadSlaves){
 			Message checkDead = CheckPointConstructor.constructDelSlaveMessage(id);
 			sendCheckPoint(checkDead);
+		}
+
+		/**
+		 * Reroute unfinished Jobs
+		 */
+		int count = 0;
+		while(!unfinishedQueue.isEmpty() && count<10){
+			Job j = unfinishedQueue.peek();
+
+			Message delegate = j.generateMessage();
+			try {
+				boolean success = sendBacktoCoordinatorService.sendMessage
+                        (delegate, new DatagramSocket(), new NetConfig( IPOfCoordinator, portOfCoordinatorRecvJobs));
+				if(success) {
+					unfinishedQueue.poll();
+					CurrentTime.tprintln(String.format("RECOVERING: Rerouted JOB[id: %s]", j.getJobId()));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			count ++;
 		}
 	}
 
@@ -186,7 +214,8 @@ public class Commander extends Distributer {
 
 			slaveOffice.setJobStatus(slaveId, jid, status);
 			// send checkpoint
-
+			Message checkReport = CheckPointConstructor.constructSetJobStatusMessage(slaveId, jid, status);
+			sendCheckPoint(checkReport);
 			System.out.println(report);
 		}
 
@@ -217,8 +246,8 @@ public class Commander extends Distributer {
 				 */
 				Message snapShot = CheckPointConstructor.constructSnapShotMessage(this);
 				sendCheckPoint(snapShot);
-				System.out.printf("Register new secondary [id: %s, ip: %s]\n",
-						id, ip);
+				CurrentTime.tprintln(String.format("SCALE: Register new secondary [id: %s, ip: %s]\n",
+						id, ip));
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 				return false;
@@ -226,7 +255,7 @@ public class Commander extends Distributer {
 		} else if (type.equals(MemberShipConstructor.SECONDARYDEAD)) {
 			String id = json.getString("id");
 			backUps.delSecondary(id);
-			System.out.printf("Secondary %s dead\n", id);
+			CurrentTime.tprintln(String.format("DETECTED: Secondary %s dead\n", id));
 		} else {
 			System.out.println("Un-acceptable membership message");
 			System.out.println(msg);

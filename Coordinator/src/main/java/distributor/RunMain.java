@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import shared.ConnMetrics;
+import shared.CurrentTime;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -82,9 +83,9 @@ public class RunMain {
 		if (type.equals(MemberShipConstructor.YOUAREPRIMARY)) {
 			System.out.printf("GET YOUAREPRIMARY, I AM %d\n", identity);
 			if (identity == ID_SECONDARY) {
-				System.out.println("I am becoming a primary");
 				switchIdentiry(ID_PRIMARY);
 
+				CurrentTime.tprintln(String.format("Secondary: %s becoming PRIMARY", id));
 				System.out.println("==============SNAPSHOT=============");
 				System.out.println(player);
 			}
@@ -162,5 +163,6 @@ public class RunMain {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
+
 	}
 }

@@ -11,10 +11,7 @@ import services.io.NetConfig;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by xingchij on 11/18/15.
@@ -76,11 +73,11 @@ public class AllSlaves {
 		 * @param commander
 		 * @throws IOException
 		 */
-		void takeNewJob(Job job, NetServiceProxy commander) throws IOException {
+		boolean takeNewJob(Job job, NetServiceProxy commander) throws IOException {
 			DatagramSocket server = new DatagramSocket();
-
+			boolean success = false;
 			try {
-				boolean success = commander.sendMessage(job.generateMessage(),
+				success = commander.sendMessage(job.generateMessage(),
 						server, delegateTaskConn);
 				if (success) {
 					jobList.add(job);
@@ -89,9 +86,9 @@ public class AllSlaves {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-
 			} finally {
 				server.close();
+				return success;
 			}
 
 		}
@@ -151,8 +148,17 @@ public class AllSlaves {
 		slavesIdList.add(id);
 	}
 
-	public void delSlave(String id) {
-		// slavesIPList.remove(ip);
+	public void delSlave(String id, Queue<Job> unfinishedQueue) {
+		// dump unfinished jobs out from this dead slave
+
+		Slave monitor = slaves.get(id);
+		if(monitor == null) return;
+		for(Job j : monitor.jobList){
+			if(!j.getStatus().equals(JobSettings.JOB_SUCCESS)){
+				unfinishedQueue.add(j);
+			}
+		}
+
 		slaves.remove(id);
 		slavesIdList.remove(id);
 	}
@@ -190,9 +196,10 @@ public class AllSlaves {
 
 		Slave slave = slaves.get(targetKey);
 
-		slave.takeNewJob(job, commander);
-
-		return slave.getId();
+		boolean success = slave.takeNewJob(job, commander);
+		if(success)
+			return slave.getId();
+		else return null;
 	}
 
 	public void setJobStatus(String slaveId, String jobId, String status) {
@@ -218,7 +225,7 @@ public class AllSlaves {
 		slave.checkPointAddNewJob(job);
 	}
 
-	public List<String> checkDead() {
+	public List<String> checkDead(Queue<Job> unfinishedQueue) {
 		Collection<Slave> allMonitors = new ArrayList<Slave>();
 		for (Slave monitor : slaves.values()) {
 			allMonitors.add(monitor);
@@ -228,12 +235,22 @@ public class AllSlaves {
 		for (Slave monitor : allMonitors) {
 			if (monitor.isTimeout()) {
 				monitor.health_state = HEALTH_DEAD;
-				slaves.remove(monitor.getId());
-				slavesIdList.remove(monitor.getId());
-				death.add(monitor.getId());
-				System.out.printf(
-						"Find Slave [id: %s, ip: %s] dead, REMOVED\n",
-						monitor.getId(), monitor.getSlaveIP());
+
+				String sid = monitor.getId();
+
+				// dump unfinished jobs out from this dead slave
+				for(Job j : monitor.jobList){
+					if(!j.getStatus().equals(JobSettings.JOB_SUCCESS)){
+						unfinishedQueue.add(j);
+					}
+				}
+
+				slaves.remove(sid);
+				slavesIdList.remove(sid);
+				death.add(sid);
+				CurrentTime.tprintln(String.format(
+						"DETECTED: Find Slave [id: %s, ip: %s] dead, REMOVED\n",
+						monitor.getId(), monitor.getSlaveIP()));
 			} else {
 
 			}
@@ -273,9 +290,9 @@ public class AllSlaves {
 			 */
 			if (theOne == null) {
 				String ip = json.getString("ip");
-				System.out.printf(
-						"Find new slave[id: %s, ip: %s], register it\n",
-						slaveId, ip);
+				CurrentTime.tprintln(String.format(
+						"SCALE: Find new slave[id: %s, ip: %s], register it\n",
+						slaveId, ip));
 				addSlave(slaveId, ip);
 				return slaveId;
 			} else {

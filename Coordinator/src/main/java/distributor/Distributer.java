@@ -2,15 +2,18 @@ package distributor;
 
 import message.Message;
 import message.msgconstructor.HeartBeatConstructor;
+import org.json.JSONArray;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
 import shared.AllSecondaries;
 import shared.AllSlaves;
 import shared.ConnMetrics;
+import shared.Job;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.util.Queue;
 
 /**
  * Created by xingchij on 11/19/15.
@@ -25,6 +28,8 @@ public abstract class Distributer implements ConnMetrics {
 	public String id;
 
 	public NetConfig coordinator;
+	public Queue<Job> unfinishedQueue;
+
 	private NetServiceProxy heartBeatService = NetServiceFactory
 			.getHeartBeatService();
 
@@ -42,14 +47,25 @@ public abstract class Distributer implements ConnMetrics {
 	}
 
 	public String toString(){
-		if(ip == null || id == null || slaveOffice == null || backUps == null)
+		if(ip == null || id == null || slaveOffice == null || backUps == null || unfinishedQueue == null)
 			return null;
 
 		StringBuilder output = new StringBuilder();
 		output.append(String.format("id: %s\tip: %s\n", id, ip));
 		output.append(String.format("Slaves: %s\n", slaveOffice.dump().toString()));
 		output.append(String.format("Secondaries: %s\n", backUps.dump().toString()));
+		output.append(String.format("UnfinishedQueue: %s\n", dumpQueue().toString()));
 		return output.toString();
+	}
+	public JSONArray dumpQueue(){
+		JSONArray array = new JSONArray();
+		if(unfinishedQueue == null)
+			return array;
+		for(Job j : unfinishedQueue){
+			array.put(j.getJobInJson());
+		}
+
+		return array;
 	}
 
 }

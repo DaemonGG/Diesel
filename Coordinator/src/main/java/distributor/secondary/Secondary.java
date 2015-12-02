@@ -11,15 +11,14 @@ import org.json.JSONObject;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
-import shared.AllSecondaries;
-import shared.AllSlaves;
-import shared.ConnMetrics;
-import shared.Job;
+import shared.*;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Created by xingchij on 11/19/15.
@@ -34,6 +33,7 @@ public class Secondary extends Distributer {
 		ip = NetConfig.getMyIp();
 		this.id = id;
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
+		unfinishedQueue = new LinkedList<Job>();
 
 		slaveOffice = AllSlaves.getOffice();
 		slaveOffice.refreshAll();
@@ -89,8 +89,8 @@ public class Secondary extends Distributer {
 			String ip = json.getString("ip");
 			try {
 				backUps.addSecondary(id, ip, portOfSecondaryCheckPoint);
-				System.out.printf("Register new secondary [id: %s, ip: %s]\n",
-						id, ip);
+				CurrentTime.tprintln(String.format("SCALE: Register new secondary [id: %s, ip: %s]\n",
+						id, ip));
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 				return false;
@@ -98,7 +98,7 @@ public class Secondary extends Distributer {
 		} else if (type.equals(MemberShipConstructor.SECONDARYDEAD)) {
 			String id = json.getString("id");
 			backUps.delSecondary(id);
-			System.out.printf("Secondary %s dead\n", id);
+			CurrentTime.tprintln(String.format("DETECTED: Secondary %s dead\n", id));
 		} else {
 			System.out.println("Un-acceptable membership message");
 			System.out.println(msg);
@@ -136,6 +136,12 @@ public class Secondary extends Distributer {
 
 			Job newJob = new Job(jobjson);
 			slaveOffice.checkAddNewJob(id, newJob);
+
+			/* This newly delegated job could be a rerouted one
+				We need to remove it from unfinished list
+			 */
+			delFromUnfinishedQueue(id);
+
 		} else if (type.equals(CheckPointConstructor.ADD_SLAVE)) {
 			String sid = json.getString("sid");
 			String ip = json.getString("ip");
@@ -145,7 +151,7 @@ public class Secondary extends Distributer {
 								sid, ip);
 				return false;
 			}
-			System.out.printf("Get new slave [id: %s, ip:%s]\n", sid, ip);
+			CurrentTime.tprintln(String.format("CHECKPOINT: Get new slave [id: %s, ip:%s]\n", sid, ip));
 			slaveOffice.addSlave(sid, ip);
 
 		} else if (type.equals(CheckPointConstructor.SET_JOB_STATUS)) {
@@ -156,15 +162,20 @@ public class Secondary extends Distributer {
 			slaveOffice.setJobStatus(sid, jid, status);
 		} else if(type.equals(CheckPointConstructor.DEAD_SLAVE)){
 			String sid = json.getString("sid");
-			slaveOffice.delSlave(sid);
-			System.out.printf("Slave id: %s  dead\n", sid);
+			slaveOffice.delSlave(sid, unfinishedQueue);
+			CurrentTime.tprintln(String.format("CHECKPOINT: Slave id: %s  dead\n", sid));
 
 		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){
 			JSONArray secondaries = json.getJSONArray("secondaries");
 			JSONArray slaves = json.getJSONArray("slaves");
+			JSONArray unfinished = json.getJSONArray("unfinished");
+
 			backUps.construct(secondaries);
 			slaveOffice.construct(slaves);
 			backUps.delSecondary(id);
+
+			construct(unfinished);
+
 			System.out.println("==============SNAPSHOT=============");
 			System.out.println(this);
 		} else{
@@ -172,5 +183,22 @@ public class Secondary extends Distributer {
 			return false;
 		}
 		return true;
+	}
+	private void construct(JSONArray unfarray){
+		unfinishedQueue.clear();
+		for(int i=0; i<unfarray.length(); i++){
+			JSONObject jobjson = unfarray.getJSONObject(i);
+			Job unf = new Job(jobjson);
+			unfinishedQueue.offer(unf);
+		}
+	}
+	private void delFromUnfinishedQueue(String id){
+		Iterator<Job> it = unfinishedQueue.iterator();
+		while(it.hasNext()){
+			Job thisOne = it.next();
+			if(thisOne.getJobId().equals(id)){
+				it.remove();
+			}
+		}
 	}
 }

@@ -14,7 +14,8 @@ import java.util.UUID;
 
 /**
  * this is a Job represents a test task Job object and "DELEGATE" Message
- * objects can be equally transformed between each other. NOTE: the "DELEGATE"
+ * objects can be equally transformed between each other.
+ * NOTE: the "DELEGATE"
  * Message sent by web client contains no JobId. JobId is first assigned by web
  * client. Master , Slaves will receive "DELEGATE" Message with a unique JobId.
  */
@@ -64,6 +65,8 @@ public class Job implements JobSettings {
 	public String getValue() {
 		return this.value;
 	}
+
+	public String getStatus(){return status;}
 
 	public void setStatus(String status) {
 		this.status = status;
