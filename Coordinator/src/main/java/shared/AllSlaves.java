@@ -248,9 +248,9 @@ public class AllSlaves {
 				slaves.remove(sid);
 				slavesIdList.remove(sid);
 				death.add(sid);
-				System.out.printf(
-						"Find Slave [id: %s, ip: %s] dead, REMOVED\n",
-						monitor.getId(), monitor.getSlaveIP());
+				CurrentTime.tprintln(String.format(
+						"DETECTED: Find Slave [id: %s, ip: %s] dead, REMOVED\n",
+						monitor.getId(), monitor.getSlaveIP()));
 			} else {
 
 			}
@@ -290,9 +290,9 @@ public class AllSlaves {
 			 */
 			if (theOne == null) {
 				String ip = json.getString("ip");
-				System.out.printf(
-						"Find new slave[id: %s, ip: %s], register it\n",
-						slaveId, ip);
+				CurrentTime.tprintln(String.format(
+						"SCALE: Find new slave[id: %s, ip: %s], register it\n",
+						slaveId, ip));
 				addSlave(slaveId, ip);
 				return slaveId;
 			} else {

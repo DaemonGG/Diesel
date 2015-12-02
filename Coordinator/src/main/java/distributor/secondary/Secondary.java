@@ -11,10 +11,7 @@ import org.json.JSONObject;
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
-import shared.AllSecondaries;
-import shared.AllSlaves;
-import shared.ConnMetrics;
-import shared.Job;
+import shared.*;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -91,8 +88,8 @@ public class Secondary extends Distributer {
 			String ip = json.getString("ip");
 			try {
 				backUps.addSecondary(id, ip, portOfSecondaryCheckPoint);
-				System.out.printf("Register new secondary [id: %s, ip: %s]\n",
-						id, ip);
+				CurrentTime.tprintln(String.format("SCALE: Register new secondary [id: %s, ip: %s]\n",
+						id, ip));
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 				return false;
@@ -100,7 +97,7 @@ public class Secondary extends Distributer {
 		} else if (type.equals(MemberShipConstructor.SECONDARYDEAD)) {
 			String id = json.getString("id");
 			backUps.delSecondary(id);
-			System.out.printf("Secondary %s dead\n", id);
+			CurrentTime.tprintln(String.format("DETECTED: Secondary %s dead\n", id));
 		} else {
 			System.out.println("Un-acceptable membership message");
 			System.out.println(msg);
@@ -147,7 +144,7 @@ public class Secondary extends Distributer {
 								sid, ip);
 				return false;
 			}
-			System.out.printf("Get new slave [id: %s, ip:%s]\n", sid, ip);
+			CurrentTime.tprintln(String.format("CHECKPOINT: Get new slave [id: %s, ip:%s]\n", sid, ip));
 			slaveOffice.addSlave(sid, ip);
 
 		} else if (type.equals(CheckPointConstructor.SET_JOB_STATUS)) {
@@ -159,7 +156,7 @@ public class Secondary extends Distributer {
 		} else if(type.equals(CheckPointConstructor.DEAD_SLAVE)){
 			String sid = json.getString("sid");
 			slaveOffice.delSlave(sid, unfinishedQueue);
-			System.out.printf("Slave id: %s  dead\n", sid);
+			CurrentTime.tprintln(String.format("CHECKPOINT: Slave id: %s  dead\n", sid));
 
 		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){
 			JSONArray secondaries = json.getJSONArray("secondaries");

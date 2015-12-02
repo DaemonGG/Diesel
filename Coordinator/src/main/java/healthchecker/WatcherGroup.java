@@ -10,6 +10,7 @@ import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
 import shared.ConnMetrics;
+import shared.CurrentTime;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -223,6 +224,9 @@ public class WatcherGroup implements ConnMetrics {
 					System.out.printf("Assign new Primary to [id: %s, ip: %s] fail\n",
 							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
 					nextPrimary = null;
+				}else{
+					CurrentTime.tprintln(String.format("RECOVERY: Assigned new Primary to [id: %s, ip: %s]",
+							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP()));
 				}
 				loopCount ++;
 			}
@@ -390,23 +394,23 @@ public class WatcherGroup implements ConnMetrics {
 
 				if (monitor.whatIRepresent() == ID_PRIMARY) {
 					watcherNum --;
-					System.out.println("Find primary dead, choose a new one..");
+					CurrentTime.tprintln(String.format(
+							"DETECTED: Find primary [id: %s, ip: %s] dead, choose a new one..",
+							monitor.getRepresentedId(), monitor.getConn().getIP()));
 					if (changePrimary() == false) {
-						System.out
-								.println("No Primary alive, system crashed...");
+						CurrentTime.tprintln("CRASH: No Primary alive, system crashed...");
 						primary = null;
 						System.exit(1);
 					} else {
-						System.out
-								.println("Found Primary Dead, selected a new one");
+						CurrentTime.tprintln("RECOVERY: Selected a new PRIMARY");
 					}
 
 				} else if (monitor.whatIRepresent() == ID_SECONDARY) {
 
-					System.out.printf(
-							"Found secondary [id: %s, ip: %s] daed\n", monitor
+					CurrentTime.tprintln(String.format(
+							"DETECTED: Found secondary [id: %s, ip: %s] daed\n", monitor
 									.getRepresentedId(), monitor.getConn()
-									.getIP());
+									.getIP()));
 					String id = monitor.getRepresentedId();
 
 					// if the dead secondary is the next primary, select another

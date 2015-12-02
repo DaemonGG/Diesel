@@ -12,6 +12,7 @@ import services.common.NetServiceProxy;
 import services.io.NetConfig;
 import shared.AllSecondaries;
 import shared.AllSlaves;
+import shared.CurrentTime;
 import shared.Job;
 
 import java.io.IOException;
@@ -71,10 +72,6 @@ public class Commander extends Distributer {
 	public void serve() {
 
 		/**
-		 * send heart beat to Membership Coordinator
-		 */
-
-		/**
 		 * receive test tasks from coordinator and delegate task to slaves
 		 */
 		try {
@@ -88,6 +85,9 @@ public class Commander extends Distributer {
 							.constructAddJobMessage(newJob, slave);
 					sendCheckPoint(checkAddJob);
 				}else{
+					CurrentTime.tprintln(String.format(
+							"DETECTED: Delegate JOB[id: %s] to Slave fail",
+							newJob.getJobId()));
 					unfinishedQueue.add(newJob);
 				}
 			}
@@ -149,8 +149,10 @@ public class Commander extends Distributer {
 			try {
 				boolean success = sendBacktoCoordinatorService.sendMessage
                         (delegate, new DatagramSocket(), new NetConfig( IPOfCoordinator, portOfCoordinatorRecvJobs));
-				if(success)
+				if(success) {
 					unfinishedQueue.poll();
+					CurrentTime.tprintln(String.format("RECOVERING: Rerouted JOB[id: %s]", j.getJobId()));
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -244,8 +246,8 @@ public class Commander extends Distributer {
 				 */
 				Message snapShot = CheckPointConstructor.constructSnapShotMessage(this);
 				sendCheckPoint(snapShot);
-				System.out.printf("Register new secondary [id: %s, ip: %s]\n",
-						id, ip);
+				CurrentTime.tprintln(String.format("SCALE: Register new secondary [id: %s, ip: %s]\n",
+						id, ip));
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 				return false;
@@ -253,7 +255,7 @@ public class Commander extends Distributer {
 		} else if (type.equals(MemberShipConstructor.SECONDARYDEAD)) {
 			String id = json.getString("id");
 			backUps.delSecondary(id);
-			System.out.printf("Secondary %s dead\n", id);
+			CurrentTime.tprintln(String.format("DETECTED: Secondary %s dead\n", id));
 		} else {
 			System.out.println("Un-acceptable membership message");
 			System.out.println(msg);
