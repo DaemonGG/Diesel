@@ -344,9 +344,9 @@ public class WatcherGroup implements ConnMetrics {
 			 */
 			if (theOne == null) {
 				String ip = json.getString("ip");
-				System.out.printf(
+				CurrentTime.tprintln(String.format(
 						"Find new distributor[id: %s, ip: %s], register it\n",
-						distributorId, ip);
+						distributorId, ip));
 				addBackUp(distributorId, ip, portForMemberShipConfig);
 
 				if (primary == null) {
@@ -359,8 +359,8 @@ public class WatcherGroup implements ConnMetrics {
 					who = ID_SECONDARY;
 				}
 			} else {
-				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
-						theOne.getRepresentedId(), theOne.getConn().getIP());
+//				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
+//						theOne.getRepresentedId(), theOne.getConn().getIP());
 
 				if (theOne.identity == ID_PRIMARY) {
 					who = ID_PRIMARY;
@@ -408,7 +408,7 @@ public class WatcherGroup implements ConnMetrics {
 				} else if (monitor.whatIRepresent() == ID_SECONDARY) {
 
 					CurrentTime.tprintln(String.format(
-							"DETECTED: Found secondary [id: %s, ip: %s] daed\n", monitor
+							"DETECTED: Found secondary [id: %s, ip: %s] dead\n", monitor
 									.getRepresentedId(), monitor.getConn()
 									.getIP()));
 					String id = monitor.getRepresentedId();

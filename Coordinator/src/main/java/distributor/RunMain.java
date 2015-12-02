@@ -137,15 +137,16 @@ public class RunMain {
 				player.sendHeartBeat();
 
 				if(loop == 5) {
-					CurrentTime.tprintln("HeartBeating");
+					//CurrentTime.tprintln("HeartBeating");
 					loop = 0;
 				}
 
 				listenmemberShipChange();
 				player.serve();
 
-			} catch (InterruptedIOException e) {
+			} catch(InterruptedIOException e) {
 				closeConnections();
+				CurrentTime.tprintln("I am dead");
 				System.out
 						.println("Distributor terminated. All resources released");
 				return;
