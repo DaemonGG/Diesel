@@ -104,7 +104,6 @@ public class Job implements JobSettings {
 		if (msg.getType() == (MessageTypes.DELEGATE)) {
 			String content = msg.getContent();
 			JSONObject json = new JSONObject(content);
-			System.out.println(json.toString());
 			String type = json.getString("type");
 			String value = json.getString("url");
 			int uid = json.getInt("userId");

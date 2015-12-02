@@ -43,7 +43,12 @@ public class TaskReceiver implements Runnable, ConnMetrics {
 	private Message getNextJob() {
 		if (pendingJob.isEmpty())
 			return null;
-		return pendingJob.poll().generateMessage();
+		return pendingJob.peek().generateMessage();
+	}
+	private void dequeue(){
+		if (pendingJob.isEmpty())
+			return ;
+		pendingJob.poll();
 	}
 
 	public TaskReceiver() throws SocketException {
@@ -85,12 +90,18 @@ public class TaskReceiver implements Runnable, ConnMetrics {
 		if (primary == null)
 			return false;
 		Message task = getNextJob();
+		boolean success= false;
 		try {
-			commandService.sendMessage(task, new DatagramSocket(), primary);
+			success = commandService.sendMessage(task, new DatagramSocket(), primary);
 		} catch (IOException e) {
 			e.printStackTrace();
+			success = false;
+		}finally {
+			if(success){
+				dequeue();
+				return true;
+			}
 			return false;
 		}
-		return true;
 	}
 }

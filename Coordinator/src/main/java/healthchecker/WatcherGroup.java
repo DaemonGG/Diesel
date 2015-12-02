@@ -71,7 +71,7 @@ public class WatcherGroup implements ConnMetrics {
 
 	public static final int HEALTH_HEALTHY = 2;
 	public static final int HEALTH_DEAD = 3;
-	public static final long TIMEOUT = 12000;
+	public static final long TIMEOUT = 15000;
 
 	public static final int RECV_HEARTBEAT_TIMEOUT = 5000;
 	public static final int RECV_WHOISPRIMARY_TIMEOUT = 20;
@@ -420,7 +420,7 @@ public class WatcherGroup implements ConnMetrics {
 					if (announceSecondaryDead(monitor) == false) {
 						System.out.println("\tUnable to fix");
 					} else {
-						System.out.println("\tinformed");
+						//System.out.println("\tinformed");
 					}
 
 				} else {

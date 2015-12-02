@@ -19,7 +19,7 @@ public class CommandService implements NetService {
 		if (imp.sendMessage(msg, serverSocket, netConf) == false)
 			return false;
 
-		serverSocket.setSoTimeout(5000);
+		serverSocket.setSoTimeout(4000);
 
 		Message ack = imp.receiveMessage(serverSocket);
 

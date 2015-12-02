@@ -31,7 +31,7 @@ public class CheckPointService implements NetService {
 
 		List<InetAddress> secondaries = netConf.getBrdCastAddr();
 		int port = netConf.getPort();
-		serverSocket.setSoTimeout(100000);
+		serverSocket.setSoTimeout(4000);
 
 		for (InetAddress addr : secondaries) {
 			try {

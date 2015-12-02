@@ -85,7 +85,7 @@ public class RunMain {
 			if (identity == ID_SECONDARY) {
 				switchIdentiry(ID_PRIMARY);
 
-				CurrentTime.tprintln(String.format("Secondary: %s becoming PRIMARY", id));
+				CurrentTime.tprintln(String.format("Secondary[id: %s] becoming PRIMARY", id));
 				System.out.println("==============SNAPSHOT=============");
 				System.out.println(player);
 			}
@@ -130,10 +130,16 @@ public class RunMain {
 	}
 
 	public void run() {
+		int loop = 0;
 		while (true) {
 			try {
 
 				player.sendHeartBeat();
+
+				if(loop == 5) {
+					CurrentTime.tprintln("HeartBeating");
+					loop = 0;
+				}
 
 				listenmemberShipChange();
 				player.serve();
@@ -149,6 +155,7 @@ public class RunMain {
 				System.out.println(e);
 				e.printStackTrace();
 			}
+			loop ++;
 		}
 	}
 
