@@ -15,9 +15,9 @@ public interface ConnMetrics {
 	public static final int portOfCoordinatorRecvJobs = 8008;
 	public static final int portOfCoordinatorForPrimaryAddr = 8009;
 	public static final int portOfMongoDB = 27017;
-	public static final String IPOfMongoDB = "128.237.135.135";
+	public static final String IPOfMongoDB = "128.237.165.25";
 	public static final String DB_NAME = "diesel";
-	public static final String IPOfCoordinator = "192.168.1.2";
+	public static final String IPOfCoordinator = "128.237.177.87";
 
 	public void closeConnections();
 
