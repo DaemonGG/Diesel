@@ -47,8 +47,14 @@ public class AppiumServer extends Distributer {
 			this.taskExecutor.registerServer(this);
 			new Thread(this.connectionHandler).start();
 			new Thread(this.taskExecutor).start();
+			int i = 0;
 			while(true) {
+				i++;
 				sendHeartBeat();
+				if (i == 5) {
+					getPrimary();
+					i = 0;
+				}
 				Thread.sleep(TIMEOUT);
 			}
 		} catch (IOException e) {

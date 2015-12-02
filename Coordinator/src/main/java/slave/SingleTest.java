@@ -57,7 +57,6 @@ public class SingleTest {
 	@Test
 	public void runTest() throws Exception {
 		System.out.println("Running Tests");
-		System.setProperty("url", "http://www.facebook.com");
 		System.out.println(System.getProperty("url"));
 		driver.get(System.getProperty("url"));
 		Thread.sleep(2000);

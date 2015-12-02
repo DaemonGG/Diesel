@@ -55,19 +55,18 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 		Job job;
 		JUnitCore junit = new JUnitCore();
 		String val;
-		int intVal;
+		int jobID;
 		Message msg;
 		while (this.runCondition) {
 			try {
 				job = this.server.removeJob();
 				if (job == null) {
-					System.out.println("Executor Sleeping");
 					Thread.sleep(TIMEOUT);
 				} else {
-					val = job.getValue();
-					intVal = Integer.parseInt(val);
-					setJobStatus(intVal, JobStatus.RUNNING);
-					System.setProperty("url", val);
+					val = job.getJobId();
+					jobID = Integer.parseInt(job.getJobId());
+					setJobStatus(jobID, JobStatus.RUNNING);
+					System.setProperty("url", job.getValue());
 					System.setProperty("image_count", "1");
 					junit.run(SingleTest.class);
 					File dir = new File(IMG_LOC);
@@ -77,10 +76,10 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 							insertImage(child, val);
 						}
 						System.out.println("Saved photos");
-						setJobStatus(intVal, JobStatus.DONE);
+						setJobStatus(jobID, JobStatus.DONE);
 						msg=ReportConstructor.generateReport(this.id, val, JobSettings.JOB_SUCCESS);
 					} else {
-						setJobStatus(intVal, JobStatus.FAILED);
+						setJobStatus(jobID, JobStatus.FAILED);
 						msg=ReportConstructor.generateReport(this.id, val, JobSettings.JOB_FAIL);
 					}
 					DatagramSocket socket = new DatagramSocket(8031);
