@@ -23,21 +23,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Commander.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Commander.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.13729128">
+            <state vertical-scroll-proportion="-2.7407408">
               <caret line="71" column="25" selection-start-line="71" selection-start-column="25" selection-end-line="71" selection-end-column="25" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Secondary.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Secondary.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="99" column="58" selection-start-line="99" selection-start-column="58" selection-end-line="99" selection-end-column="58" />
+            <state vertical-scroll-proportion="0.08348794">
+              <caret line="142" column="39" selection-start-line="142" selection-start-column="39" selection-end-line="142" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -195,8 +195,8 @@
         <option value="$PROJECT_DIR$/src/main/java/distributor/RunMain.java" />
         <option value="$PROJECT_DIR$/src/main/java/healthchecker/WatcherGroup.java" />
         <option value="$PROJECT_DIR$/src/main/java/shared/AllSlaves.java" />
-        <option value="$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java" />
         <option value="$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java" />
+        <option value="$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java" />
       </list>
     </option>
   </component>
@@ -1439,14 +1439,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="99" column="58" selection-start-line="99" selection-start-column="58" selection-end-line="99" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/shared/AllSlaves.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-17.185184">
@@ -1457,8 +1449,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/distributor/commander/Commander.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13729128">
+        <state vertical-scroll-proportion="-2.7407408">
           <caret line="71" column="25" selection-start-line="71" selection-start-column="25" selection-end-line="71" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/distributor/secondary/Secondary.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.08348794">
+          <caret line="142" column="39" selection-start-line="142" selection-start-column="39" selection-end-line="142" selection-end-column="39" />
           <folding />
         </state>
       </provider>

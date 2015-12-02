@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -135,6 +136,12 @@ public class Secondary extends Distributer {
 
 			Job newJob = new Job(jobjson);
 			slaveOffice.checkAddNewJob(id, newJob);
+
+			/* This newly delegated job could be a rerouted one
+				We need to remove it from unfinished list
+			 */
+			delFromUnfinishedQueue(id);
+
 		} else if (type.equals(CheckPointConstructor.ADD_SLAVE)) {
 			String sid = json.getString("sid");
 			String ip = json.getString("ip");
@@ -183,6 +190,15 @@ public class Secondary extends Distributer {
 			JSONObject jobjson = unfarray.getJSONObject(i);
 			Job unf = new Job(jobjson);
 			unfinishedQueue.offer(unf);
+		}
+	}
+	private void delFromUnfinishedQueue(String id){
+		Iterator<Job> it = unfinishedQueue.iterator();
+		while(it.hasNext()){
+			Job thisOne = it.next();
+			if(thisOne.getJobId().equals(id)){
+				it.remove();
+			}
 		}
 	}
 }
