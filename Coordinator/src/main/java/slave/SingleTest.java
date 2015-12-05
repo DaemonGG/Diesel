@@ -33,7 +33,7 @@ public class SingleTest {
 	@Before
 	public void setUp() throws Exception {
 		System.out.println("Setting up image directory");
-		imgCount = Integer.parseInt(System.getProperty("image_count"));
+		imgCount = 1; //Integer.parseInt(System.getProperty("image_count"));
 		setupDir(IMG_LOC);
 		setupDir(CONFIG_LOC);
 		System.out.println("Configuring Tests");
@@ -57,6 +57,7 @@ public class SingleTest {
 	@Test
 	public void runTest() throws Exception {
 		System.out.println("Running Tests");
+		System.setProperty("url", "https://www.google.com");
 		System.out.println(System.getProperty("url"));
 		driver.get(System.getProperty("url"));
 		Thread.sleep(2000);
