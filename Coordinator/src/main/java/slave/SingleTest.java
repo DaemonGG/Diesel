@@ -38,7 +38,7 @@ public class SingleTest {
 		setupDir(CONFIG_LOC);
 		System.out.println("Configuring Tests");
 		DesiredCapabilities capabilities = new DesiredCapabilities();
-		capabilities.setCapability("deviceName", "iPhone 5s");
+		capabilities.setCapability("deviceName", "iPhone");
 		capabilities.setCapability("platformName", "iOS");
 		capabilities.setCapability("platformVersion", "9.1");
 		capabilities.setCapability("browserName", "safari");

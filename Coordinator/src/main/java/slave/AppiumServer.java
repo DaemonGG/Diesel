@@ -5,7 +5,9 @@ import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.WhoIsPrimaryConstructor;
+
 import org.json.JSONObject;
+
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
@@ -46,11 +48,15 @@ public class AppiumServer extends Distributer {
 			new Thread(this.connectionHandler).start();
 			new Thread(this.taskExecutor).start();
 			int i = 0;
-			while(true) {
+			while (true) {
 				i++;
+				System.out.print("Sending heartbeat...");
 				sendHeartBeat();
+				System.out.println("done");
 				if (i == 5) {
+					System.out.print("Getting Primary...");
 					getPrimary();
+					System.out.println("received");
 					i = 0;
 				}
 				Thread.sleep(TIMEOUT);
