@@ -15,16 +15,21 @@ public class Coordinator {
 
 	private TaskReceiver gate;
 	private WatcherGroup spies;
+	private MongoDBExplorer detecter;
 
 	public Coordinator() throws SocketException {
 		gate = new TaskReceiver();
 		spies = new WatcherGroup();
+		detecter = new MongoDBExplorer(ConnMetrics.IPsOfMongoDB);
 	}
 
 	public void run() {
 		Thread reception = new Thread(gate);
 		reception.start();
 
+		Thread dbexp = new Thread(detecter);
+		dbexp.start();
+		
 		while (true) {
 			try {
 				int identity = spies.watchForHeartBeat();
