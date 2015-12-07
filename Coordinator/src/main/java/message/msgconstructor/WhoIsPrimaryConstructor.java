@@ -18,7 +18,18 @@ public class WhoIsPrimaryConstructor {
 
 	public static Message constructAnswer(String primaryIp) {
 		JSONObject json = new JSONObject();
+		
+		if(primaryIp == null) primaryIp = "None";
 		json.put("ip", primaryIp);
+	
+		return new Message(MessageTypes.WHOISPRIMARY, json.toString());
+	}
+	
+	public static Message constructDBAnswer( String dbIP) {
+		JSONObject json = new JSONObject();
+		
+		if(dbIP == null) dbIP = "None";
+		json.put("dbip", dbIP);
 		return new Message(MessageTypes.WHOISPRIMARY, json.toString());
 	}
 }

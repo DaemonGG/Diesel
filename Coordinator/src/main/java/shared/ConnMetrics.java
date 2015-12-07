@@ -14,10 +14,12 @@ public interface ConnMetrics {
 	public static final int portForMemberShipConfig = 8006;
 	public static final int portOfCoordinatorRecvJobs = 8008;
 	public static final int portOfCoordinatorForPrimaryAddr = 8009;
+	public static final int portOfCoordinatorForPrimaryDB = 8010;
+
 	public static final int portOfMongoDB = 27017;
-	public static final String IPOfMongoDB = "128.237.165.25";
+	public static final String[] IPsOfMongoDB = {"128.237.191.159", "128.2.57.41","128.237.179.42"};
 	public static final String DB_NAME = "diesel";
-	public static final String IPOfCoordinator = "128.237.177.87";
+	public static final String IPOfCoordinator = "128.237.179.42";
 
 	public void closeConnections();
 
