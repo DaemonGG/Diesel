@@ -59,6 +59,7 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 				if (job == null) {
 					Thread.sleep(TIMEOUT);
 				} else {
+					System.out.println("Executing test");
 					val = job.getJobId();
 					jobID = Integer.parseInt(job.getJobId());
 					setJobStatus(jobID, JobStatus.RUNNING);

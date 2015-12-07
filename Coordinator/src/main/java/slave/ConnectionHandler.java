@@ -32,8 +32,6 @@ public class ConnectionHandler extends AbstractAppiumExecutionService {
 					System.out.println(msg);
 					Job j = Job.getJobFromDelegateMsg(msg);
 					this.server.addJob(j);
-					System.out.println(j);
-					System.out.println(j.getJobId());
 				} else {
 					Thread.sleep(TIMEOUT);
 				}

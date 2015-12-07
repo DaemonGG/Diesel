@@ -33,12 +33,12 @@ public class SingleTest {
 	@Before
 	public void setUp() throws Exception {
 		System.out.println("Setting up image directory");
-		imgCount = Integer.parseInt(System.getProperty("image_count"));
+		imgCount = 1; //Integer.parseInt(System.getProperty("image_count"));
 		setupDir(IMG_LOC);
 		setupDir(CONFIG_LOC);
 		System.out.println("Configuring Tests");
 		DesiredCapabilities capabilities = new DesiredCapabilities();
-		capabilities.setCapability("deviceName", "iPhone 5s");
+		capabilities.setCapability("deviceName", "iPhone");
 		capabilities.setCapability("platformName", "iOS");
 		capabilities.setCapability("platformVersion", "9.1");
 		capabilities.setCapability("browserName", "safari");
@@ -57,8 +57,9 @@ public class SingleTest {
 	@Test
 	public void runTest() throws Exception {
 		System.out.println("Running Tests");
-		System.out.println(System.getProperty("url"));
-		driver.get(System.getProperty("url"));
+		//System.out.println(System.getProperty("url"));
+		System.out.println("https://www.facebook.com");
+		driver.get("https://www.facebook.com");
 		Thread.sleep(2000);
 		getScreenshot(driver);
 		System.out.println("Completed Tests");
