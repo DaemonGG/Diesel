@@ -27,8 +27,8 @@ public class Coordinator {
 		Thread reception = new Thread(gate);
 		reception.start();
 
-		Thread dbexp = new Thread(detecter);
-		dbexp.start();
+//		Thread dbexp = new Thread(detecter);
+//		dbexp.start();
 		
 		while (true) {
 			try {

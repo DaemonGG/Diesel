@@ -1,6 +1,7 @@
 package services.io;
 
 import java.net.*;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -48,23 +49,26 @@ public class NetConfig {
 
 	public static String getMyIp() throws SocketException {
 		String myip = null;
-		NetworkInterface ni = NetworkInterface.getByName("en0");
-		Enumeration inetAddress = ni.getInetAddresses();
+        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+        for (NetworkInterface ni : Collections.list(nets)){
+        	//NetworkInterface ni = NetworkInterface.getByName("en0");
+        	Enumeration inetAddress = ni.getInetAddresses();
 
-		if (!inetAddress.hasMoreElements()) {
-			return null;
-		}
+        	if (!inetAddress.hasMoreElements()) {
+        		return null;
+        	}
 
-		InetAddress addr = (InetAddress) inetAddress.nextElement();
+        	InetAddress addr = (InetAddress) inetAddress.nextElement();
 
-		while (inetAddress.hasMoreElements()) {
-			addr = (InetAddress) inetAddress.nextElement();
-			if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-				myip = addr.getHostAddress();
-				break;
-			}
-		}
-		return myip;
+        	while (inetAddress.hasMoreElements()) {
+        		addr = (InetAddress) inetAddress.nextElement();
+        		if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+        			myip = addr.getHostAddress();
+        			return myip;
+        		}
+        	}
+        }
+        return null;
 	}
 
 }

@@ -80,14 +80,17 @@ public class Commander extends Distributer {
 			// Job newJob = new Job("scroll", "www.baidu.com", 0, "jin");
 			if (newJob != null) {
 				String slave = slaveOffice.pushOneJob(newJob, toSlaves);
-				if(slave != null) {
+				//if(slave != null) {
 					Message checkAddJob = CheckPointConstructor
 							.constructAddJobMessage(newJob, slave);
 					sendCheckPoint(checkAddJob);
-				}else{
-					CurrentTime.tprintln(String.format(
-							"DETECTED: Delegate JOB[id: %s] to Slave fail",
-							newJob.getJobId()));
+//				}else{
+//					CurrentTime.tprintln(String.format(
+//							"DETECTED: Delegate JOB[id: %s] to Slave fail",
+//							newJob.getJobId()));
+//					unfinishedQueue.add(newJob);
+//				}
+				if(slave == null){
 					unfinishedQueue.add(newJob);
 				}
 			}
@@ -211,12 +214,14 @@ public class Commander extends Distributer {
 			String slaveId = json.getString("sid");
 			String jid = json.getString("jid");
 			String status = json.getString("status");
+			
+			CurrentTime.tprintln(String.format("Set JOb[%s] Status[%s]", jid, status));
 
 			slaveOffice.setJobStatus(slaveId, jid, status);
 			// send checkpoint
 			Message checkReport = CheckPointConstructor.constructSetJobStatusMessage(slaveId, jid, status);
 			sendCheckPoint(checkReport);
-			System.out.println(report);
+			//System.out.println(report);
 		}
 
 		return true;

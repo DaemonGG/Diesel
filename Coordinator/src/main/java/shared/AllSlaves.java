@@ -296,8 +296,8 @@ public class AllSlaves {
 				addSlave(slaveId, ip);
 				return slaveId;
 			} else {
-				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
-						theOne.getId(), theOne.getSlaveIP());
+//				System.out.printf("Get HeartBeat from[id: %s, ip: %s]\n",
+//						theOne.getId(), theOne.getSlaveIP());
 
 				theOne.lastUpdate = System.currentTimeMillis();
 				theOne.health_state = HEALTH_HEALTHY;

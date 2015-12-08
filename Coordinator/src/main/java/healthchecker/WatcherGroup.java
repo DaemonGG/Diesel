@@ -214,15 +214,15 @@ public class WatcherGroup implements ConnMetrics {
 
 				nextPrimary = backUpGroup.get(nextId);
 
-				System.out.printf("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
+				CurrentTime.tprintln(String.format("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
 						nextPrimary.getRepresentedId(), nextPrimary.getConn()
-								.getIP());
+								.getIP()));
 				success = membershipService.sendMessage(assignPrimary,
 						new DatagramSocket(), nextPrimary.getConn());
 
 				if (success == false) {
-					System.out.printf("Assign new Primary to [id: %s, ip: %s] fail\n",
-							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
+//					System.out.printf("Assign new Primary to [id: %s, ip: %s] fail\n",
+//							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
 					nextPrimary = null;
 				}else{
 					CurrentTime.tprintln(String.format("RECOVERY: Assigned new Primary to [id: %s, ip: %s]",
@@ -458,7 +458,7 @@ public class WatcherGroup implements ConnMetrics {
 		}
 		Message answer = WhoIsPrimaryConstructor.constructAnswer(primary
 				.getConn().getIP());
-		System.out.printf("Tell [ip:%s, port:%d] primary address\n",  ip, port);
+		//System.out.printf("Tell [ip:%s, port:%d] primary address\n",  ip, port);
 		tellAboutPrimaryService.sendMessage(answer, whoIsPrimaryDock,
 				new NetConfig(ip, port));
 	}
