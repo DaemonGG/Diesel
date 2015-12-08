@@ -18,6 +18,7 @@ public interface ConnMetrics {
 
 	public static final int portOfMongoDB = 27017;
 	public static final String[] IPsOfMongoDB = { "128.2.57.41","128.237.191.159","128.237.179.42"};
+	public static final String IPOfMongoDB = "108.39.205.74";
 	public static final String DB_NAME = "diesel";
 	public static final String IPOfCoordinator = "128.237.220.51";
 

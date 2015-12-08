@@ -77,6 +77,7 @@ public class WatcherGroup implements ConnMetrics {
 	public static final int RECV_WHOISPRIMARY_TIMEOUT = 20;
 
 	public int watcherNum = 0;
+	public boolean workable = false;
 	int nextPrimaryIndex = 0;
 	Watcher primary = null;
 
@@ -333,6 +334,19 @@ public class WatcherGroup implements ConnMetrics {
 			String content = hbt.getContent();
 			JSONObject json = new JSONObject(content);
 			String distributorId = json.getString("id");
+			
+			String working = "true";
+			
+			try{
+				working = json.getString("working");
+			}catch(org.json.JSONException e){			
+			}
+			
+			if(working.equals("true")){
+				workable = true;
+			}else {
+				workable = false;
+			}
 
 			Watcher theOne = group.get(distributorId);
 

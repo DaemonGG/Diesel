@@ -36,7 +36,7 @@ public class Coordinator {
 
 				spies.checkDead();
 
-				if (identity == WatcherGroup.ID_PRIMARY) {
+				if (identity == WatcherGroup.ID_PRIMARY && spies.workable == true) {
 					// send task to primary when receive hearteat from primary
 					gate.sendTask(new NetConfig(spies.getPrimary().getIP(), ConnMetrics.portReceiveJobs));
 				}
@@ -65,8 +65,10 @@ public class Coordinator {
 	}
 
 	public static void main(String[] args) throws SocketException {
-		System.out.println("Coordinator now running...");
+		
 		Coordinator coordinator = new Coordinator();
+		System.out.println("Coordinator now running...");
 		coordinator.run();
+		
 	}
 }

@@ -14,6 +14,7 @@ import shared.Job;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Created by xingchij on 11/19/15.
@@ -28,7 +29,7 @@ public abstract class Distributer implements ConnMetrics {
 	public String id;
 
 	public NetConfig coordinator;
-	public Queue<Job> unfinishedQueue;
+	public Set<Job> unfinishedJobSet;
 
 	private NetServiceProxy heartBeatService = NetServiceFactory
 			.getHeartBeatService();
@@ -47,7 +48,7 @@ public abstract class Distributer implements ConnMetrics {
 	}
 
 	public String toString(){
-		if(ip == null || id == null || slaveOffice == null || backUps == null || unfinishedQueue == null)
+		if(ip == null || id == null || slaveOffice == null || backUps == null || unfinishedJobSet == null)
 			return null;
 
 		StringBuilder output = new StringBuilder();
@@ -59,9 +60,9 @@ public abstract class Distributer implements ConnMetrics {
 	}
 	public JSONArray dumpQueue(){
 		JSONArray array = new JSONArray();
-		if(unfinishedQueue == null)
+		if(unfinishedJobSet == null)
 			return array;
-		for(Job j : unfinishedQueue){
+		for(Job j : unfinishedJobSet){
 			array.put(j.getJobInJson());
 		}
 

@@ -23,4 +23,13 @@ public class HeartBeatConstructor {
 		Message hbt = new Message(MessageTypes.HEARTBEAT, json.toString());
 		return hbt;
 	}
+	
+	public static Message constructHeartBeatToCoordinator(String id, String ip, String working) {
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("ip", ip);
+		json.put("working", working);
+		Message hbt = new Message(MessageTypes.HEARTBEAT, json.toString());
+		return hbt;
+	}
 }

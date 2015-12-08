@@ -5,6 +5,7 @@ import error.WrongMessageTypeException;
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.CheckPointConstructor;
+import message.msgconstructor.HeartBeatConstructor;
 import message.msgconstructor.MemberShipConstructor;
 import org.json.JSONObject;
 import services.common.NetServiceFactory;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -47,7 +50,7 @@ public class Commander extends Distributer {
 		ip = NetConfig.getMyIp();
 		this.id = id;
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
-		unfinishedQueue = new LinkedList<Job>();
+		unfinishedJobSet = new HashSet<Job>();
 
 		slaveOffice = AllSlaves.getOffice();
 		slaveOffice.refreshAll();
@@ -91,7 +94,10 @@ public class Commander extends Distributer {
 //					unfinishedQueue.add(newJob);
 //				}
 				if(slave == null){
-					unfinishedQueue.add(newJob);
+					unfinishedJobSet.add(newJob);
+					
+				}else{
+					CurrentTime.tprintln(String.format("Delivered one job [%s]", newJob.toString()));
 				}
 			}
 
@@ -135,7 +141,7 @@ public class Commander extends Distributer {
 		/**
 		 * check for dead slaves
 		 */
-		List<String> deadSlaves = slaveOffice.checkDead(unfinishedQueue);
+		List<String> deadSlaves = slaveOffice.checkDead(unfinishedJobSet);
 		for(String id: deadSlaves){
 			Message checkDead = CheckPointConstructor.constructDelSlaveMessage(id);
 			sendCheckPoint(checkDead);
@@ -145,16 +151,20 @@ public class Commander extends Distributer {
 		 * Reroute unfinished Jobs
 		 */
 		int count = 0;
-		while(!unfinishedQueue.isEmpty() && count<10){
-			Job j = unfinishedQueue.peek();
+		Iterator<Job> unf = unfinishedJobSet.iterator();
+		while(unf.hasNext() && count<10){
+			Job j = unf.next();
 
 			Message delegate = j.generateMessage();
 			try {
 				boolean success = sendBacktoCoordinatorService.sendMessage
                         (delegate, new DatagramSocket(), new NetConfig( IPOfCoordinator, portOfCoordinatorRecvJobs));
 				if(success) {
-					unfinishedQueue.poll();
+					unf.remove();
 					CurrentTime.tprintln(String.format("RECOVERING: Rerouted JOB[id: %s]", j.getJobId()));
+					
+					Message checkAddUnf = CheckPointConstructor.constructAddUnfJobMessage(j);
+					sendCheckPoint(checkAddUnf);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -267,5 +277,19 @@ public class Commander extends Distributer {
 			return false;
 		}
 		return true;
+	}
+	
+	public void sendHeartBeat() throws IOException {
+		if (coordinator == null) {
+			System.out
+					.println("Err: Coordinator network connection not initialized!");
+			return;
+		}
+		String working = "true";
+		if(slaveOffice.getNum() == 0 )
+			working = "false";
+		heartBeatService.sendMessage(
+				HeartBeatConstructor.constructHeartBeatToCoordinator(id, ip, working),
+				new DatagramSocket(), coordinator);
 	}
 }

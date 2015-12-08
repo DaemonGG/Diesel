@@ -32,7 +32,7 @@ public class AllSlaves {
 		int health_state;
 		long lastUpdate;
 
-		List<Job> jobList = new ArrayList<Job>();
+		Set<Job> jobSet = new HashSet<Job>();
 		HashMap<String, Job> jobMap = new HashMap<String, Job>();
 		int jobsNum = 0;
 
@@ -80,7 +80,7 @@ public class AllSlaves {
 				success = commander.sendMessage(job.generateMessage(),
 						server, delegateTaskConn);
 				if (success) {
-					jobList.add(job);
+					jobSet.add(job);
 					jobMap.put(job.getJobId(), job);
 					jobsNum++;
 				}
@@ -94,7 +94,7 @@ public class AllSlaves {
 		}
 
 		void checkPointAddNewJob(Job job) {
-			jobList.add(job);
+			jobSet.add(job);
 			jobMap.put(job.getJobId(), job);
 			jobsNum++;
 		}
@@ -126,6 +126,9 @@ public class AllSlaves {
 	ArrayList<String> slavesIdList = new ArrayList<String>();
 	int index = 0;
 
+	public int getNum(){
+		return slavesIdList.size();
+	}
 	private AllSlaves() {
 	};
 
@@ -148,12 +151,12 @@ public class AllSlaves {
 		slavesIdList.add(id);
 	}
 
-	public void delSlave(String id, Queue<Job> unfinishedQueue) {
+	public void delSlave(String id, Set<Job> unfinishedQueue) {
 		// dump unfinished jobs out from this dead slave
 
 		Slave monitor = slaves.get(id);
 		if(monitor == null) return;
-		for(Job j : monitor.jobList){
+		for(Job j : monitor.jobSet){
 			if(!j.getStatus().equals(JobSettings.JOB_SUCCESS)){
 				unfinishedQueue.add(j);
 			}
@@ -225,7 +228,7 @@ public class AllSlaves {
 		slave.checkPointAddNewJob(job);
 	}
 
-	public List<String> checkDead(Queue<Job> unfinishedQueue) {
+	public List<String> checkDead(Set<Job> unfinishedQueue) {
 		Collection<Slave> allMonitors = new ArrayList<Slave>();
 		for (Slave monitor : slaves.values()) {
 			allMonitors.add(monitor);
@@ -239,7 +242,7 @@ public class AllSlaves {
 				String sid = monitor.getId();
 
 				// dump unfinished jobs out from this dead slave
-				for(Job j : monitor.jobList){
+				for(Job j : monitor.jobSet){
 					if(!j.getStatus().equals(JobSettings.JOB_SUCCESS)){
 						unfinishedQueue.add(j);
 					}

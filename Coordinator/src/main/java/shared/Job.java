@@ -132,4 +132,13 @@ public class Job implements JobSettings {
 			return true;
 		return false;
 	}
+	
+	public String toString(){
+		return String.format("JobID: %s, URL: %s, Status: %s\n", jobId, value, status);
+	}
+	
+	public boolean equals(Object o){
+		Job another = (Job)o;
+		return this.jobId.equals(another.getJobId());
+	}
 }
