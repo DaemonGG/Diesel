@@ -12,6 +12,8 @@ import shared.Job;
  */
 public class CheckPointConstructor {
 	public static final String ADD_JOB = "addJob";
+	public static final String ADD_UNF_JOB = "addunfJob";
+
 	public static final String ADD_SLAVE = "addSlave";
 	public static final String DEAD_SLAVE = "delSlave";
 
@@ -27,6 +29,17 @@ public class CheckPointConstructor {
 		json.put("jobDetail", jobjson);
 		json.put("sid", id);
 		json.put("checktype", ADD_JOB);
+		String content = json.toString();
+		return new Message(MessageTypes.CHECKPOINT, content);
+	}
+	
+	public static Message constructAddUnfJobMessage(Job job) {
+		if (job == null )
+			return null;
+		JSONObject json = new JSONObject();
+		JSONObject jobjson = job.getJobInJson();
+		json.put("jobDetail", jobjson);
+		json.put("checktype", ADD_UNF_JOB);
 		String content = json.toString();
 		return new Message(MessageTypes.CHECKPOINT, content);
 	}

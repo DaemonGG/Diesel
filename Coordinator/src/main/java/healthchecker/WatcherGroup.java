@@ -77,6 +77,7 @@ public class WatcherGroup implements ConnMetrics {
 	public static final int RECV_WHOISPRIMARY_TIMEOUT = 20;
 
 	public int watcherNum = 0;
+	public boolean workable = false;
 	int nextPrimaryIndex = 0;
 	Watcher primary = null;
 
@@ -214,15 +215,15 @@ public class WatcherGroup implements ConnMetrics {
 
 				nextPrimary = backUpGroup.get(nextId);
 
-				System.out.printf("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
+				CurrentTime.tprintln(String.format("Sending YOUAREPRIMARY to [id: %s, ip: %s]\n",
 						nextPrimary.getRepresentedId(), nextPrimary.getConn()
-								.getIP());
+								.getIP()));
 				success = membershipService.sendMessage(assignPrimary,
 						new DatagramSocket(), nextPrimary.getConn());
 
 				if (success == false) {
-					System.out.printf("Assign new Primary to [id: %s, ip: %s] fail\n",
-							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
+//					System.out.printf("Assign new Primary to [id: %s, ip: %s] fail\n",
+//							nextPrimary.getRepresentedId(), nextPrimary.getConn().getIP());
 					nextPrimary = null;
 				}else{
 					CurrentTime.tprintln(String.format("RECOVERY: Assigned new Primary to [id: %s, ip: %s]",
@@ -333,6 +334,19 @@ public class WatcherGroup implements ConnMetrics {
 			String content = hbt.getContent();
 			JSONObject json = new JSONObject(content);
 			String distributorId = json.getString("id");
+			
+			String working = "true";
+			
+			try{
+				working = json.getString("working");
+			}catch(org.json.JSONException e){			
+			}
+			
+			if(working.equals("true")){
+				workable = true;
+			}else {
+				workable = false;
+			}
 
 			Watcher theOne = group.get(distributorId);
 
@@ -458,7 +472,7 @@ public class WatcherGroup implements ConnMetrics {
 		}
 		Message answer = WhoIsPrimaryConstructor.constructAnswer(primary
 				.getConn().getIP());
-		System.out.printf("Tell [ip:%s, port:%d] primary address\n",  ip, port);
+		//System.out.printf("Tell [ip:%s, port:%d] primary address\n",  ip, port);
 		tellAboutPrimaryService.sendMessage(answer, whoIsPrimaryDock,
 				new NetConfig(ip, port));
 	}

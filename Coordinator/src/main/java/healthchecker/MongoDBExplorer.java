@@ -60,9 +60,9 @@ public class MongoDBExplorer implements Runnable{
 		String ip = json.getString("sip");
 		int port = json.getInt("port");
 		
-		String dbip = explore();
-		
-		Message answer = WhoIsPrimaryConstructor.constructAnswer(dbip);
+		//String dbip = explore();
+		if(ip == null) ip = "None";
+		Message answer = WhoIsPrimaryConstructor.constructAnswer(ip);
 		System.out.printf("Tell [ip:%s, port:%d] db primary address\n",  ip, port);
 		tellAboutPrimaryService.sendMessage(answer, whoIsPrimaryDock,
 				new NetConfig(ip, port));
@@ -71,7 +71,10 @@ public class MongoDBExplorer implements Runnable{
 	public void run() {
 		while(true){
 			try {
+				ip = explore();
+				System.out.println(ip);
 				watchForQuery();
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

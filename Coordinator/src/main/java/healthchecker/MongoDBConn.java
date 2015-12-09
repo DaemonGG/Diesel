@@ -26,22 +26,27 @@ import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 
+import shared.ConnMetrics;
+
 public class MongoDBConn {
 
 	
     public static boolean insertNonsense(String ip){
-    	
-    	MongoClient mongoClient = new MongoClient( ip , 27017 );
-    	DB db = mongoClient.getDB("diesel");
-    	DBCollection job_coll = db.getCollection("testConn");
-    	
-    	BasicDBObject job = new BasicDBObject("user","I am nothing").append("jobID", "-1-1-1").append("url", "")
-        .append("status","0");
     	try{
+    		MongoClient mongoClient = new MongoClient( ip , ConnMetrics.portOfMongoDB );
+    		DB db = mongoClient.getDB("diesel");
+    		DBCollection job_coll = db.getCollection("testConn");
+    	
+    	
+    		BasicDBObject job = new BasicDBObject("user","I am nothing").append("jobID", "-1-1-1").append("url", "")
+    				.append("status","0");
+    		
     		job_coll.insert(job, WriteConcern.SAFE);
     		job_coll.remove(job);
     		return true;
-    	}catch(Exception e){
+    	}
+    	catch(Exception e){
+    		//e.printStackTrace();
     		return false;
     	}
     }

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -33,7 +34,7 @@ public class Secondary extends Distributer {
 		ip = NetConfig.getMyIp();
 		this.id = id;
 		coordinator = new NetConfig(IPOfCoordinator, portOfCoordinatorHeartBeat);
-		unfinishedQueue = new LinkedList<Job>();
+		unfinishedJobSet = new HashSet<Job>();
 
 		slaveOffice = AllSlaves.getOffice();
 		slaveOffice.refreshAll();
@@ -114,7 +115,7 @@ public class Secondary extends Distributer {
 		if (check == null)
 			return true;
 
-		System.out.println(check);
+		//System.out.println(check);
 
 		if (check.getType() != MessageTypes.CHECKPOINT) {
 			throw new WrongMessageTypeException(check.getType(),
@@ -136,11 +137,22 @@ public class Secondary extends Distributer {
 
 			Job newJob = new Job(jobjson);
 			slaveOffice.checkAddNewJob(id, newJob);
+			
+			CurrentTime.tprintln(String.format("CHECHPOINT add new job [%s]\n", newJob.toString()));
 
 			/* This newly delegated job could be a rerouted one
 				We need to remove it from unfinished list
 			 */
 			delFromUnfinishedQueue(id);
+
+		}else if (type.equals(CheckPointConstructor.ADD_UNF_JOB)) {
+			JSONObject jobjson = json.getJSONObject("jobDetail");
+
+			Job newJob = new Job(jobjson);
+			unfinishedJobSet.add(newJob);
+			
+			CurrentTime.tprintln(String.format("CHECHPOINT add unfinished job [%s]\n", newJob.toString()));
+
 
 		} else if (type.equals(CheckPointConstructor.ADD_SLAVE)) {
 			String sid = json.getString("sid");
@@ -162,7 +174,7 @@ public class Secondary extends Distributer {
 			slaveOffice.setJobStatus(sid, jid, status);
 		} else if(type.equals(CheckPointConstructor.DEAD_SLAVE)){
 			String sid = json.getString("sid");
-			slaveOffice.delSlave(sid, unfinishedQueue);
+			slaveOffice.delSlave(sid, unfinishedJobSet);
 			CurrentTime.tprintln(String.format("CHECKPOINT: Slave id: %s  dead\n", sid));
 
 		} else if(type.equals(CheckPointConstructor.SNAPSHOT)){
@@ -185,15 +197,15 @@ public class Secondary extends Distributer {
 		return true;
 	}
 	private void construct(JSONArray unfarray){
-		unfinishedQueue.clear();
+		unfinishedJobSet.clear();
 		for(int i=0; i<unfarray.length(); i++){
 			JSONObject jobjson = unfarray.getJSONObject(i);
 			Job unf = new Job(jobjson);
-			unfinishedQueue.offer(unf);
+			unfinishedJobSet.add(unf);
 		}
 	}
 	private void delFromUnfinishedQueue(String id){
-		Iterator<Job> it = unfinishedQueue.iterator();
+		Iterator<Job> it = unfinishedJobSet.iterator();
 		while(it.hasNext()){
 			Job thisOne = it.next();
 			if(thisOne.getJobId().equals(id)){
