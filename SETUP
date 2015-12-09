@@ -1,0 +1,15 @@
+How to change tab name:
+
+Command + i
+* a window will pop up*
+type in a new name
+ESC
+*change panel colors after you do this step*
+
+How to change tab colors:
+*navigate to Diesel*
+./changeColor.sh ###### (6 character hex code)
+
+coordinator: D64541
+primary + secondary: 049372
+slave: 4B77BE
