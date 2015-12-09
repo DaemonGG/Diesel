@@ -32,8 +32,10 @@ public class MongoDBConn {
 
 	
     public static boolean insertNonsense(String ip){
+    	MongoClient mongoClient= null;
+    	boolean success = false;
     	try{
-    		MongoClient mongoClient = new MongoClient( ip , ConnMetrics.portOfMongoDB );
+    		mongoClient = new MongoClient( ip , ConnMetrics.portOfMongoDB );
     		DB db = mongoClient.getDB("diesel");
     		DBCollection job_coll = db.getCollection("testConn");
     	
@@ -43,12 +45,16 @@ public class MongoDBConn {
     		
     		job_coll.insert(job, WriteConcern.SAFE);
     		job_coll.remove(job);
-    		return true;
+    		success = true;
     	}
     	catch(Exception e){
     		//e.printStackTrace();
-    		return false;
+    		
+    	}finally{
+    		mongoClient.close();
+    		
     	}
+    	return success;
     }
     
     public void insert(String empname, String filename, DBCollection collection)

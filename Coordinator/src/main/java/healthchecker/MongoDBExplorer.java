@@ -62,7 +62,7 @@ public class MongoDBExplorer implements Runnable{
 		
 		//String dbip = explore();
 		if(ip == null) ip = "None";
-		Message answer = WhoIsPrimaryConstructor.constructAnswer(ip);
+		Message answer = WhoIsPrimaryConstructor.constructDBAnswer(ip);
 		System.out.printf("Tell [ip:%s, port:%d] db primary address\n",  ip, port);
 		tellAboutPrimaryService.sendMessage(answer, whoIsPrimaryDock,
 				new NetConfig(ip, port));

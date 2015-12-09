@@ -12,6 +12,8 @@ import shared.Job;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -20,6 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TaskReceiver implements Runnable, ConnMetrics {
 
 	private LinkedBlockingQueue<Job> pendingJob;
+	private Set<String> pendingJobSet;
 	private final static int MAX_JOB_NUM = 9999;
 	private DatagramSocket recvNewJobDock;
 	private NetServiceProxy commandService;
@@ -32,6 +35,8 @@ public class TaskReceiver implements Runnable, ConnMetrics {
 	 * @return false if the queue is full
 	 */
 	private boolean addJob(Job newJob) {
+		if(pendingJobSet.contains(newJob.getJobId()));
+		pendingJobSet.add(newJob.getJobId());
 		return pendingJob.offer(newJob);
 	}
 
@@ -48,7 +53,8 @@ public class TaskReceiver implements Runnable, ConnMetrics {
 	private void dequeue(){
 		if (pendingJob.isEmpty())
 			return ;
-		pendingJob.poll();
+		Job j=pendingJob.poll();
+		pendingJobSet.remove(j.getJobId());
 	}
 
 	public TaskReceiver() throws SocketException {
@@ -56,6 +62,7 @@ public class TaskReceiver implements Runnable, ConnMetrics {
 		recvNewJobDock = new DatagramSocket(portOfCoordinatorRecvJobs);
 		JobNum = 0;
 		commandService = NetServiceFactory.getCommandService();
+		pendingJobSet = new HashSet<String>();
 	}
 
 	public void run() {
