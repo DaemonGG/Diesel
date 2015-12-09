@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 
 public class TaskExecutor extends AbstractAppiumExecutionService {
-	private static final int QUERY_PORT = 12354, DB_QUERY_PORT = 12354;
+	private static final int QUERY_PORT = 12354, DB_QUERY_PORT = 12355;
 	private static final String IMG_LOC = "imgs/";
 
 	private String id;
@@ -51,13 +51,15 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 				if (job == null) {
 					Thread.sleep(TIMEOUT);
 				} else {
-					System.out.println("Executing test");
+					System.out.println("Received test");
 					val = job.getJobId();
 					jobID = Integer.parseInt(job.getJobId());
 					setJobStatus(jobID, JobStatus.RUNNING);
 					System.setProperty("url", job.getValue());
 					System.setProperty("image_count", "1");
+					System.out.println("Running the testing");
 					junit.run(SingleTest.class);
+					System.out.println("Done executing test");
 					File dir = new File(IMG_LOC);
 					File[] directoryListing = dir.listFiles();
 					if (directoryListing != null && directoryListing.length > 0) {
@@ -119,17 +121,23 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 		Message msg = WhoIsPrimaryConstructor.constructQuery(this.ip,
 				DB_QUERY_PORT);
 		NetServiceProxy proxy = NetServiceFactory.getRawUDPService();
+		System.out.println("Finished setup");
 		proxy.sendMessage(msg, socket, new NetConfig(
 				ConnMetrics.IPOfCoordinator,
 				ConnMetrics.portOfCoordinatorForPrimaryDB));
+		System.out.println("Message sent");
 		Message response = proxy.receiveMessage(socket);
+		System.out.println("Response received");
 		socket.close();
 		if (response.getType() == MessageTypes.WHOISPRIMARY) {
 			JSONObject obj = new JSONObject(response.getContent());
 			String ip = obj.getString("dbip");
+
+			System.out.println("GOT DBIP : " + ip);
 			return (ip.equals("None")) ? null : new NetConfig(ip,
 					ConnMetrics.portReceiveReport);
 		} else {
+			System.out.println("FAIL");
 			throw new WrongMessageTypeException(response.getType(),
 					MessageTypes.WHOISPRIMARY);
 		}
@@ -156,8 +164,8 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 	private void insertImage(File file, String jobID) {
 		MongoClient client = null;
 		try {
-			NetConfig config = getMongo();
-			client = new MongoClient(config.getIP(), config.getPort());
+			client = new MongoClient("128.237.191.159",
+					ConnMetrics.portOfMongoDB);
 			MongoDatabase db = client.getDatabase(ConnMetrics.DB_NAME);
 
 			MongoCollection<Document> result = db.getCollection("result");
@@ -173,8 +181,6 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 			stream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (WrongMessageTypeException e) {
-			e.printStackTrace();
 		} finally {
 			if (client != null) {
 				client.close();
@@ -183,21 +189,23 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 	}
 
 	private void setJobStatus(int jobID, JobStatus status) {
+		System.out.println("Getting job status : " + jobID);
 		MongoClient client = null;
 		try {
-		NetConfig config = getMongo();
-		client = new MongoClient(config.getIP(), config.getPort());
-		MongoDatabase db = client.getDatabase(ConnMetrics.DB_NAME);
+			// NetConfig config = getMongo();
+			// if (config == null) {
+			// System.out.println("CRASH");
+			// } else {
+			// System.out.println(config.getIP());
+			// }
+			client = new MongoClient("128.237.191.159",
+					ConnMetrics.portOfMongoDB);
+			MongoDatabase db = client.getDatabase(ConnMetrics.DB_NAME);
 
-		db.getCollection("job")
-				.updateOne(
-						new Document("jobID", jobID),
-						new Document("$set", new Document("status", status
-								.getStatus())));
-		} catch(IOException e) {
-			e.printStackTrace();
-		} catch (WrongMessageTypeException e) {
-			e.printStackTrace();
+			db.getCollection("job").updateOne(
+					new Document("jobID", jobID),
+					new Document("$set", new Document("status", status
+							.getStatus())));
 		} finally {
 			if (client != null) {
 				client.close();
