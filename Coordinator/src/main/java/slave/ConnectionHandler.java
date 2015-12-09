@@ -29,7 +29,7 @@ public class ConnectionHandler extends AbstractAppiumExecutionService {
 			try {
 				msg = this.commandService.recvAckMessage(this.getTasksDock);
 				if (msg != null) {
-					System.out.println(msg);
+					//System.out.println(msg);
 					Job j = Job.getJobFromDelegateMsg(msg);
 					this.server.addJob(j);
 				} else {

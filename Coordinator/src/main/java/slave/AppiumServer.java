@@ -50,13 +50,13 @@ public class AppiumServer extends Distributer {
 			int i = 0;
 			while (true) {
 				i++;
-				System.out.print("Sending heartbeat...");
+				//System.out.print("Sending heartbeat...");
 				sendHeartBeat();
-				System.out.println("done");
+				//System.out.println("done");
 				if (i == 5) {
-					System.out.print("Getting Primary...");
+					//System.out.print("Getting Primary...");
 					getPrimary();
-					System.out.println("received");
+					//System.out.println("received");
 					i = 0;
 				}
 				Thread.sleep(TIMEOUT);
