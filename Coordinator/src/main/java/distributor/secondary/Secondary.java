@@ -188,7 +188,7 @@ public class Secondary extends Distributer {
 
 			construct(unfinished);
 
-			CurrentTime.tprintln("==============SNAPSHOT=============");
+			CurrentTime.tprintln(CurrentTime.ANSI_GREEN + "==============SNAPSHOT=============");
 			System.out.println(this);
 		} else{
 			System.out.println("Err: Unknown CheckPoint Type");
