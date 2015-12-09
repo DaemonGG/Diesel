@@ -1,17 +1,20 @@
 package slave;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import error.WrongMessageTypeException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.DatagramSocket;
+
 import message.Message;
 import message.MessageTypes;
 import message.msgconstructor.ReportConstructor;
 import message.msgconstructor.WhoIsPrimaryConstructor;
+
 import org.bson.Document;
 import org.bson.types.Binary;
 import org.json.JSONObject;
 import org.junit.runner.JUnitCore;
+
 import services.common.NetServiceFactory;
 import services.common.NetServiceProxy;
 import services.io.NetConfig;
@@ -21,21 +24,30 @@ import shared.ConnMetrics;
 import shared.Job;
 import shared.JobSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.DatagramSocket;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
+import error.WrongMessageTypeException;
 
 public class TaskExecutor extends AbstractAppiumExecutionService {
-	private static final int QUERY_PORT = 12354, DB_QUERY_PORT = 12355;
+	private static final int QUERY_PORT = 12354;
 	private static final String IMG_LOC = "imgs/";
 
 	private String id;
 	private String ip;
+	private MongoClient client;
+	private MongoCollection<Document> job;
+	private MongoCollection<Document> result;
 
 	public TaskExecutor(String id, String ip) {
 		this.id = id;
 		this.ip = ip;
+		client = new MongoClient(ConnMetrics.IPOfMongoDB,
+				ConnMetrics.portOfMongoDB);
+		MongoDatabase db = client.getDatabase(ConnMetrics.DB_NAME);
+		this.job = db.getCollection("job");
+		this.result = db.getCollection("result");
 	}
 
 	@Override
@@ -51,7 +63,8 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 				if (job == null) {
 					Thread.sleep(TIMEOUT);
 				} else {
-					System.out.println("Received test");
+					System.out.println("Received test with id = "
+							+ job.getJobId());
 					val = job.getJobId();
 					jobID = Integer.parseInt(job.getJobId());
 					setJobStatus(jobID, JobStatus.RUNNING);
@@ -82,10 +95,8 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (WrongMessageTypeException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -93,6 +104,9 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 
 	public void close() {
 		this.runCondition = false;
+		if (this.client != null) {
+			this.client.close();
+		}
 	}
 
 	private NetConfig getPrimary() throws IOException,
@@ -111,33 +125,6 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 			return new NetConfig(obj.getString("ip"),
 					ConnMetrics.portReceiveReport);
 		} else {
-			throw new WrongMessageTypeException(response.getType(),
-					MessageTypes.WHOISPRIMARY);
-		}
-	}
-
-	private NetConfig getMongo() throws IOException, WrongMessageTypeException {
-		DatagramSocket socket = new DatagramSocket(DB_QUERY_PORT);
-		Message msg = WhoIsPrimaryConstructor.constructQuery(this.ip,
-				DB_QUERY_PORT);
-		NetServiceProxy proxy = NetServiceFactory.getRawUDPService();
-		System.out.println("Finished setup");
-		proxy.sendMessage(msg, socket, new NetConfig(
-				ConnMetrics.IPOfCoordinator,
-				ConnMetrics.portOfCoordinatorForPrimaryDB));
-		System.out.println("Message sent");
-		Message response = proxy.receiveMessage(socket);
-		System.out.println("Response received");
-		socket.close();
-		if (response.getType() == MessageTypes.WHOISPRIMARY) {
-			JSONObject obj = new JSONObject(response.getContent());
-			String ip = obj.getString("dbip");
-
-			System.out.println("GOT DBIP : " + ip);
-			return (ip.equals("None")) ? null : new NetConfig(ip,
-					ConnMetrics.portReceiveReport);
-		} else {
-			System.out.println("FAIL");
 			throw new WrongMessageTypeException(response.getType(),
 					MessageTypes.WHOISPRIMARY);
 		}
@@ -162,54 +149,24 @@ public class TaskExecutor extends AbstractAppiumExecutionService {
 	}
 
 	private void insertImage(File file, String jobID) {
-		MongoClient client = null;
 		try {
-			client = new MongoClient("128.237.191.159",
-					ConnMetrics.portOfMongoDB);
-			MongoDatabase db = client.getDatabase(ConnMetrics.DB_NAME);
-
-			MongoCollection<Document> result = db.getCollection("result");
 			FileInputStream stream = new FileInputStream(file);
 
 			byte b[] = new byte[stream.available()];
 			stream.read(b);
 
-			result.insertOne(new Document("photo", new Binary(b)).append(
+			this.result.insertOne(new Document("photo", new Binary(b)).append(
 					"name", jobID));
 			System.out.println("Inserted record.");
 
 			stream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			if (client != null) {
-				client.close();
-			}
 		}
 	}
 
 	private void setJobStatus(int jobID, JobStatus status) {
-		System.out.println("Getting job status : " + jobID);
-		MongoClient client = null;
-		try {
-			// NetConfig config = getMongo();
-			// if (config == null) {
-			// System.out.println("CRASH");
-			// } else {
-			// System.out.println(config.getIP());
-			// }
-			client = new MongoClient("128.237.191.159",
-					ConnMetrics.portOfMongoDB);
-			MongoDatabase db = client.getDatabase(ConnMetrics.DB_NAME);
-
-			db.getCollection("job").updateOne(
-					new Document("jobID", jobID),
-					new Document("$set", new Document("status", status
-							.getStatus())));
-		} finally {
-			if (client != null) {
-				client.close();
-			}
-		}
+		this.job.updateOne(new Document("jobID", jobID), new Document("$set",
+				new Document("status", status.getStatus())));
 	}
 }
